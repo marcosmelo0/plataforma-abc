@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@apollo/client": "^3.10.8",
+    "@vime/core": "^5.4.1",
+    "@vime/react": "^5.4.1",
     "date-fns": "^3.6.0",
     "graphql": "^16.9.0",
     "phosphor-react": "^1.4.1",

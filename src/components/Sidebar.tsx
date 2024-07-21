@@ -40,6 +40,7 @@ export function Sidebar() {
                             slug={lesson.slug}
                             availableAt={new Date(lesson.availableAt)}
                             type={lesson.lessonType}
+                            
                         />
                     )
                 })}

@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@apollo/client": "^3.10.8",
+    "@hookform/resolvers": "^3.9.0",
+    "@supabase/supabase-js": "^2.44.4",
     "@vime/core": "^5.4.1",
     "@vime/react": "^5.4.1",
     "date-fns": "^3.6.0",
@@ -18,7 +20,9 @@
     "phosphor-react": "^1.4.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.25.0"
+    "react-hook-form": "^7.52.1",
+    "react-router-dom": "^6.25.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

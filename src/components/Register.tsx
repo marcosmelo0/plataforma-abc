@@ -9,7 +9,7 @@ const formSchema = z.object({
     password: z.string().min(6, "A senha deve conter pelo menos 6 caracteres.").max(120, "A senha não pode ter mais de 120 caracteres.")
 });
 
-export function Login() {
+export function Register() {
     const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -21,12 +21,12 @@ export function Login() {
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
             const { email, password } = values;
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            const { error } = await supabase.auth.signUp({ email, password });
             if (error) throw error;
-            localStorage.setItem('t', data.session?.access_token)
+
             window.location.replace('/')
         } catch (error) {
-            console.log("Login", error);
+            console.log("Register", error);
         }
     };
 
@@ -64,7 +64,7 @@ export function Login() {
                             )}
                         </div>
                         <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-                            Entrar
+                            Criar Conta
                         </button>
                     </form>
                 </div>

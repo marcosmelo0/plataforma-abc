@@ -1,6 +1,8 @@
 import { Route, Routes } from "react-router-dom";
 import { Event } from "./pages/Event";
-import { Login } from "./components/Login";
+import { Login } from "./pages/Login";
+import { Register } from "./components/Register";
+import Courses from "./utils/curses";
 
 export function Router() {
     return (
@@ -8,6 +10,8 @@ export function Router() {
             <Route path="/" element={<Event />}/>
             <Route path="/lesson/:slug" element={<Event />}/>
             <Route path="/login" element={<Login />}/>
+            <Route path="/register" element={<Register />}/>
+            <Route path="/curses" element={<Courses />}/>
         </Routes>
     )
 }

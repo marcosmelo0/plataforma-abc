@@ -15,6 +15,9 @@ const GET_LESSON_BY_SLUG_QUERY = gql`
                 bio
                 avatarURL
             }
+            curse {
+                name
+            }
         }
     }
 `

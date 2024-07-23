@@ -35,7 +35,7 @@ export function Register() {
             <Header />
             <div className="flex items-center pb-[15vh] justify-center min-h-screen bg-gray-600">
                 <div className="bg-white p-8 rounded-lg shadow-md w-96 mx-4">
-                    <h2 className="text-2xl font-bold text-center mb-6">Entrar</h2>
+                    <h2 className="text-2xl font-bold text-center mb-6">Cadastrar</h2>
                     <form onSubmit={form.handleSubmit(onSubmit)}>
                         <div className="mb-4 text-base">
                             <label className="block text-gray-700" htmlFor="email">Email</label>
@@ -43,7 +43,7 @@ export function Register() {
                                 type="text"
                                 id="email"
                                 {...form.register("email")}
-                                className="w-full p-2 border border-gray-300 rounded outline-blue-600"
+                                className="w-full p-2 border border-gray-300 text-gray-600 rounded outline-blue-600"
                                 placeholder="Seu email..."
                             />
                             {form.formState.errors.email && (
@@ -56,7 +56,7 @@ export function Register() {
                                 type="password"
                                 id="password"
                                 {...form.register("password")}
-                                className="w-full p-2 border border-gray-300 rounded outline-blue-600"
+                                className="w-full p-2 border border-gray-300 text-gray-600 rounded outline-blue-600"
                                 placeholder="Sua senha"
                             />
                             {form.formState.errors.password && (

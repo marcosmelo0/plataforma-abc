@@ -1,8 +1,10 @@
 import { useForm } from "react-hook-form";
 import { supabase } from "../utils/supabase";
-import { Header } from "./Header";
+import { Header } from "../components/Header";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Swal from 'sweetalert2'
+import { useEffect, useState } from "react";
 
 const formSchema = z.object({
     email: z.string().email("Email inválido."),
@@ -18,14 +20,54 @@ export function Login() {
         }
     });
 
+    {sessionStorage.getItem("t")}
+
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    useEffect(() => {
+        const verifyAuthenticated = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = localStorage.getItem("sb-zrzlksbelolsesmacfhs-auth-token");
+            const tokenData = token ? JSON.parse(token) : null;
+
+            if (tokenData || tokenData.access_token === session?.access_token) {
+                window.location.replace("/");
+            } else {
+                setIsAuthenticated(false);
+            }
+        };
+
+        verifyAuthenticated();
+    }, []); 
+    
+    if (!isAuthenticated) {
+        return;
+    }
+
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
             const { email, password } = values;
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+           
             if (error) throw error;
-            localStorage.setItem('t', data.session?.access_token)
-            window.location.replace('/')
+              
+            Swal.fire({
+                position: "center",
+                icon: "success",
+                title: "Logado com sucesso!",
+                showConfirmButton: false,
+                timer: 1500
+              });
+                setTimeout(() => {
+                    window.location.replace("/")
+                }, 1510);
         } catch (error) {
+            Swal.fire({
+                title: 'Ops!',
+                text: 'Email ou senha incorretos!',
+                icon: 'error',
+                confirmButtonText: 'Ok'
+              })
             console.log("Login", error);
         }
     };
@@ -69,6 +111,7 @@ export function Login() {
                     </form>
                 </div>
             </div>
+            
         </>
     );
 }

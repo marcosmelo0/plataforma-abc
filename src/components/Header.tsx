@@ -7,11 +7,11 @@ export function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [userInitials, setUserInitials] = useState<string | null>(null);
     const [userName, setUserName] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true); // New loading state
+    const [loading, setLoading] = useState(true); 
     const location = useLocation();
 
     const fetchUserProfile = async () => {
-        setLoading(true); // Start loading
+        setLoading(true);
         try {
             const { data: { user } } = await supabase.auth.getUser();
 
@@ -43,7 +43,7 @@ export function Header() {
             setUserInitials("?");
             setUserName("Usuário");
         } finally {
-            setLoading(false); // End loading
+            setLoading(false);
         }
     };
 

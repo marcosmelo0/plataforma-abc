@@ -7,11 +7,11 @@ export function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [userInitials, setUserInitials] = useState<string | null>(null);
     const [userName, setUserName] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true); 
+    const [loading, setLoading] = useState(true); // New loading state
     const location = useLocation();
 
     const fetchUserProfile = async () => {
-        setLoading(true);
+        setLoading(true); // Start loading
         try {
             const { data: { user } } = await supabase.auth.getUser();
 
@@ -43,13 +43,18 @@ export function Header() {
             setUserInitials("?");
             setUserName("Usuário");
         } finally {
-            setLoading(false);
+            setLoading(false); // End loading
         }
     };
 
     const handleLogout = async () => {
-        await supabase.auth.signOut();
-        window.location.href = '/';
+        try {
+            console.log("Logout button clicked"); // Ensure this is printed
+            await supabase.auth.signOut();
+            window.location.href = '/';
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
     };
 
     useEffect(() => {
@@ -61,7 +66,6 @@ export function Header() {
         }
     }, [location]);
 
-    // Conditionally render the profile button based on the current path
     const showProfileButton = location.pathname !== '/login' && location.pathname !== '/register-student';
 
     return (
@@ -76,18 +80,20 @@ export function Header() {
                         aria-haspopup="true"
                         aria-expanded={isMenuOpen}
                         disabled={loading}
+                        style={{ zIndex: 1000 }} // Ensure the button is clickable
                     >
                         {loading ? "..." : (userInitials || "?")}
                     </button>
 
                     {isMenuOpen && (
-                        <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg w-48 md:w-56 z-50">
+                        <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg w-48 md:w-56" style={{ zIndex: 2000 }}>
                             <div className="p-2 border-b border-gray-200">
                                 <p className="text-gray-700 text-base text-nowrap">Bem-vindo, {userName || "Usuário"}</p>
                             </div>
                             <button
                                 onClick={handleLogout}
                                 className="block px-4 py-2 text-gray-700 hover:bg-gray-200 w-full text-left"
+                                style={{ zIndex: 2000 }} // Ensure the button is clickable
                             >
                                 Sair
                             </button>

@@ -7,7 +7,6 @@ export function Header() {
     const [userInitials, setUserInitials] = useState("");
     const [userName, setUserName] = useState("");
 
-
     const fetchUserProfile = async () => {
         const { data: { user } } = await supabase.auth.getUser();
 
@@ -32,7 +31,7 @@ export function Header() {
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
-        window.location.href = '/'; 
+        window.location.href = '/';
     };
 
     useEffect(() => {
@@ -40,24 +39,25 @@ export function Header() {
     }, []);
 
     return (
-        <header className="w-full py-5 flex items-center justify-between bg-blue-700 border-b border-blue-600 px-6">
+        <header className="w-full py-4 px-6 flex items-center justify-between bg-blue-700 border-b border-blue-600">
             <Logo />
 
             <div className="relative">
-                <button 
-                    onClick={() => setIsMenuOpen(!isMenuOpen)} 
-                    className="flex items-center justify-center w-12 h-12 rounded-full bg-white text-blue-700 font-bold text-lg hover:bg-blue-100 focus:outline-none"
+                <button
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-white text-blue-700 font-bold text-sm md:text-lg hover:bg-blue-100 focus:outline-none"
+                    aria-haspopup="true"
+                    aria-expanded={isMenuOpen}
                 >
                     {userInitials || "?"}
                 </button>
 
-                
                 {isMenuOpen && (
-                    <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg w-48">
+                    <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg w-48 md:w-56 z-50">
                         <div className="p-2 border-b border-gray-200">
                             <p className="text-gray-700 text-base text-nowrap">Bem-vindo, {userName}</p>
                         </div>
-                        <button 
+                        <button
                             onClick={handleLogout}
                             className="block px-4 py-2 text-gray-700 hover:bg-gray-200 w-full text-left"
                         >

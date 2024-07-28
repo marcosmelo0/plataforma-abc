@@ -5,27 +5,38 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Swal from "sweetalert2";
 
-
 const formSchema = z.object({
+    name: z.string().min(1, "Nome é obrigatório."),
     email: z.string().email("Email inválido."),
-    password: z.string().min(6, "A senha deve conter pelo menos 6 caracteres.").max(120, "A senha não pode ter mais de 120 caracteres.")
+    password: z.string().min(6, "A senha deve conter pelo menos 6 caracteres.").max(120, "A senha não pode ter mais de 120 caracteres."),
+    role: z.enum(["admin", "user"], { message: "Role inválido." })
 });
 
 export function Register() {
     const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
+            name: "",
             email: "",
             password: "",
+            role: "user" // Default role
         }
     });
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        
         try {
-            const { email, password } = values;
-            const { error } = await supabase.auth.signUp({ email, password });
-            if (error) throw error;
+            const { email, password, name, role } = values;
+            const { error: authError, data: {user} } = await supabase.auth.signUp({ email, password });
+            
+            if (authError) throw authError;
+
+            // Save additional user profile data in the database
+            const { error: dbError } = await supabase
+                .from('user_profiles')
+                .insert({ id: user?.id, name, is_super_admin: role === "admin" });
+
+            if (dbError) throw dbError;
+
             Swal.fire({
                 title: 'Ebaa..',
                 text: 'Aluno cadastrado!',
@@ -41,19 +52,16 @@ export function Register() {
             }, 3000);
 
         } catch (error) {
-            const stat = ({status: error})
-            if(JSON.stringify(stat).slice(63,66) === "422") {
-                Swal.fire({
-                    title: 'Ops..',
-                    text: 'Aluno já cadastrado!',
-                    icon: 'error',
-                    confirmButtonText: 'Ok',
-                    confirmButtonColor: 'blue',
-                    timerProgressBar: true,
-                    timer: 3000,
-                });
-            }
-            console.log("Register", error);
+            console.error("Register error", error);
+            Swal.fire({
+                title: 'Ops..',
+                text: 'Erro ao cadastrar!',
+                icon: 'error',
+                confirmButtonText: 'Ok',
+                confirmButtonColor: 'blue',
+                timerProgressBar: true,
+                timer: 3000,
+            });
         }
     };
 
@@ -64,6 +72,19 @@ export function Register() {
                 <div className="bg-white p-8 rounded-lg shadow-md w-96 mx-4 text-gray-700">
                     <h2 className="text-2xl font-bold text-center mb-6">Cadastrar</h2>
                     <form onSubmit={form.handleSubmit(onSubmit)}>
+                        <div className="mb-4 text-base">
+                            <label className="block text-gray-700" htmlFor="name">Nome</label>
+                            <input
+                                type="text"
+                                id="name"
+                                {...form.register("name")}
+                                className="w-full p-2 border border-gray-300 text-gray-600 rounded outline-blue-600"
+                                placeholder="Seu nome..."
+                            />
+                            {form.formState.errors.name && (
+                                <span className="text-red-500 text-sm">{form.formState.errors.name.message}</span>
+                            )}
+                        </div>
                         <div className="mb-4 text-base">
                             <label className="block text-gray-700" htmlFor="email">Email</label>
                             <input
@@ -88,6 +109,20 @@ export function Register() {
                             />
                             {form.formState.errors.password && (
                                 <span className="text-red-500 text-sm">{form.formState.errors.password.message}</span>
+                            )}
+                        </div>
+                        <div className="mb-4 text-base">
+                            <label className="block text-gray-700" htmlFor="role">Tipo de Usuário</label>
+                            <select
+                                id="role"
+                                {...form.register("role")}
+                                className="w-full p-2 border border-gray-300 text-gray-600 rounded outline-blue-600"
+                            >
+                                <option value="user">Usuário</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                            {form.formState.errors.role && (
+                                <span className="text-red-500 text-sm">{form.formState.errors.role.message}</span>
                             )}
                         </div>
                         <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition-colors">

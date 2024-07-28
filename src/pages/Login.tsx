@@ -27,7 +27,7 @@ export function Login() {
             const { data: { session } } = await supabase.auth.getSession();
             const token = localStorage.getItem("sb-zrzlksbelolsesmacfhs-auth-token");
             const tokenData = token ? JSON.parse(token) : null;
-
+           
             if (session && tokenData.access_token === session?.access_token) {
                 window.location.replace("/");
             } else {

@@ -3,6 +3,7 @@ import { CaretRight, CheckCircle, CircleNotch, FileArrowDown, Lightning } from "
 import { gql, useQuery } from "@apollo/client";
 import '@vime/core/themes/default.css';
 import { supabase } from "../utils/supabase";
+import Swal from "sweetalert2";
 
 const GET_LESSON_BY_SLUG_QUERY = gql`
     query GetLessonSlug($slug: String) {
@@ -42,6 +43,7 @@ interface GetLessonBySlugResponse {
 
 interface VideoProps {
     lessonSlug: string;
+    updateCompletedLessons: (lessonId: string) => void;
 }
 
 export function Video(props: VideoProps) {
@@ -65,21 +67,49 @@ export function Video(props: VideoProps) {
                     .eq('curso_id', data.aula.curse.id);
     
                 if (fetchError) throw fetchError;
-    
+
                 if (existingRecords.length > 0) {
-                    const updatedAulasId = [...existingRecords[0].aulas_id, data.aula.id];
-    
-                    const { error: updateError } = await supabase
-                        .from('aulasCompletas')
-                        .update({ aulas_id: updatedAulasId })
-                        .eq('aluno_id', aulunoId)
-                        .eq('curso_id', data.aula.curse.id);
-    
-                    if (updateError) throw updateError;
-    
-                    alert("Aula adicionada à lista de concluídas!");
+                    const aulasIdArray = existingRecords[0].aulas_id;
+
+                    if (aulasIdArray.includes(data.aula.id)) {
+                        const updatedAulasId = aulasIdArray.filter((id: string) => id !== data.aula.id);
+
+                        await supabase
+                            .from('aulasCompletas')
+                            .update({ aulas_id: updatedAulasId })
+                            .eq('aluno_id', aulunoId)
+                            .eq('curso_id', data.aula.curse.id);
+
+                        props.updateCompletedLessons(data.aula.id);
+                        Swal.fire({
+                            position: "top",
+                            icon: "success",
+                            title: "Aula removida da lista de concluídas!",
+                            showConfirmButton: false,
+                            timer: 2000,
+                            timerProgressBar: true,
+                        });
+                    } else {
+                        const updatedAulasId = [...aulasIdArray, data.aula.id];
+
+                        await supabase
+                            .from('aulasCompletas')
+                            .update({ aulas_id: updatedAulasId })
+                            .eq('aluno_id', aulunoId)
+                            .eq('curso_id', data.aula.curse.id);
+
+                        props.updateCompletedLessons(data.aula.id); 
+                        Swal.fire({
+                            position: "top",
+                            icon: "success",
+                            title: "Aula marcada como concluída!",
+                            showConfirmButton: false,
+                            timer: 2000,
+                            timerProgressBar: true,
+                        });
+                    }
                 } else {
-                    const { error: insertError } = await supabase
+                    await supabase
                         .from('aulasCompletas')
                         .insert([
                             {
@@ -88,14 +118,25 @@ export function Video(props: VideoProps) {
                                 aluno_id: aulunoId,
                             }
                         ]);
-    
-                    if (insertError) throw insertError;
-    
-                    alert("Aula marcada como concluída!");
+
+                    props.updateCompletedLessons(data.aula.id);
+                    Swal.fire({
+                        position: "top",
+                        icon: "success",
+                        title: "Aula marcada como concluída!",
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                    });
                 }
             } catch (error) {
                 console.error("Erro ao marcar aula como concluída:", error);
-                alert("Ocorreu um erro ao marcar a aula como concluída.");
+                Swal.fire({
+                    title: 'Ops, algo errado',
+                    text: 'Ocorreu um erro ao tentar marcar a aula como concluída.',
+                    icon: 'error',
+                    confirmButtonText: 'Ok'
+                });
             }
         }
     };

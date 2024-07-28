@@ -61,6 +61,7 @@ export function Register() {
                     window.location.href = '/'
                 }, 3000);
             }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error("Register error", error);
             Swal.fire({

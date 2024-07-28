@@ -7,7 +7,7 @@ interface LessonProps {
     slug: string;
     availableAt: Date;
     type: 'live' | 'class';
-    isCompleted: boolean; // Nova prop para indicar se a aula foi concluída
+    isCompleted: boolean;
 }
 
 export function Lesson(props: LessonProps) {
@@ -35,7 +35,7 @@ export function Lesson(props: LessonProps) {
                             Em breve
                         </span>
                     )}
-                    <span className={`text-xs text-nowrap rounded py-[0.125rem] px-2 text-white border ${props.isCompleted ? 'border-white' : 'border-blue-500'} font-bold`}>
+                    <span className={`text-xs rounded py-[0.125rem] px-2 text-white border ${props.isCompleted ? 'border-white' : 'border-blue-500'} font-bold`}>
                         {props.type === 'live' ? 'AO VIVO' : 'Aula Gravada'}
                     </span>
                 </header>

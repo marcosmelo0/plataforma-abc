@@ -5,15 +5,19 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Swal from "sweetalert2";
 
+// Definindo o esquema Zod para validação do formulário
 const formSchema = z.object({
-    name: z.string().min(1, "Nome é obrigatório."),
+    name: z.string().min(1, "O nome é obrigatório."),
     email: z.string().email("Email inválido."),
     password: z.string().min(6, "A senha deve conter pelo menos 6 caracteres.").max(120, "A senha não pode ter mais de 120 caracteres."),
-    role: z.enum(["admin", "user"], { message: "Role inválido." })
+    role: z.enum(["user", "admin"], { message: "Role deve ser 'user' ou 'admin'." })
 });
 
+// Tipo inferido do esquema Zod
+type FormValues = z.infer<typeof formSchema>;
+
 export function Register() {
-    const form = useForm({
+    const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: "",
@@ -23,39 +27,45 @@ export function Register() {
         }
     });
 
-    const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const onSubmit = async (values: FormValues) => {
         try {
             const { email, password, name, role } = values;
-            const { error: authError, data: {user} } = await supabase.auth.signUp({ email, password });
-            
-            if (authError) throw authError;
 
-            // Save additional user profile data in the database
-            const { error: dbError } = await supabase
-                .from('user_profiles')
-                .insert({ id: user?.id, name, is_super_admin: role === "admin" });
-
-            if (dbError) throw dbError;
-
-            Swal.fire({
-                title: 'Ebaa..',
-                text: 'Aluno cadastrado!',
-                icon: 'success',
-                confirmButtonText: 'Ok',
-                confirmButtonColor: 'blue',
-                timerProgressBar: true,
-                timer: 3000,
+            // Registra o usuário no Supabase Auth
+            const { data: authData, error: authError } = await supabase.auth.signUp({
+                email,
+                password
             });
 
-            setTimeout(() => {
-                window.location.href = '/'
-            }, 3000);
+            if (authError) throw authError;
 
-        } catch (error) {
+            if (authData.user) {
+                // Salva dados adicionais do perfil do usuário na tabela 'user_profiles'
+                const { error: dbError } = await supabase
+                    .from('user_profiles')
+                    .upsert({ id: authData.user.id, name, is_super_admin: role === "admin" });
+
+                if (dbError) throw dbError;
+
+                Swal.fire({
+                    title: 'Ebaa..',
+                    text: 'Aluno cadastrado!',
+                    icon: 'success',
+                    confirmButtonText: 'Ok',
+                    confirmButtonColor: 'blue',
+                    timerProgressBar: true,
+                    timer: 3000,
+                });
+
+                setTimeout(() => {
+                    window.location.href = '/'
+                }, 3000);
+            }
+        } catch (error: any) {
             console.error("Register error", error);
             Swal.fire({
                 title: 'Ops..',
-                text: 'Erro ao cadastrar!',
+                text: error.message || 'Erro ao cadastrar!',
                 icon: 'error',
                 confirmButtonText: 'Ok',
                 confirmButtonColor: 'blue',

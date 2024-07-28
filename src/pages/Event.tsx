@@ -8,14 +8,14 @@ import { supabase } from "../utils/supabase";
 
 const QueryFirst = gql`
     query {
-        lessons(first: 1) {
+        aulas(first: 1) {
             slug
         }
     }
 `;
 
 interface QueryFirstResponse {
-    lessons: {
+    aulas: {
         slug: string;
     }[]
 }
@@ -30,7 +30,14 @@ export function Event() {
             const { data: { session } } = await supabase.auth.getSession();
             const token = localStorage.getItem("sb-zrzlksbelolsesmacfhs-auth-token");
             const tokenData = token ? JSON.parse(token) : null;
+            const user = session?.user
 
+
+            
+            if( user && Object.values(user!.user_metadata).length >= 1) {
+                console.log('admin')
+            }
+            
             if (!tokenData || tokenData.access_token !== session?.access_token) {
                 window.location.replace("/login");
             } else {
@@ -50,12 +57,12 @@ export function Event() {
     }
     
 
-    const first = data?.lessons[0]?.slug;
+    const first = data?.aulas[0]?.slug;
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col">
             <Header />
-            <main className="flex flex-1">
+            <main className="flex flex-1 flex-col lg:flex-row">
                 {slug ? <Video lessonSlug={slug!} /> : <Video lessonSlug={first!} />}
                 <Sidebar />
             </main>

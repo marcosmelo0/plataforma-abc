@@ -3,7 +3,7 @@ import { supabase } from "../utils/supabase";
 import { Header } from "../components/Header";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Swal from 'sweetalert2'
+import Swal from 'sweetalert2';
 import { useEffect, useState } from "react";
 
 const formSchema = z.object({
@@ -20,9 +20,7 @@ export function Login() {
         }
     });
 
-    {sessionStorage.getItem("t")}
-
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [loading, setLoading] = useState(true); // Estado de carregamento
 
     useEffect(() => {
         const verifyAuthenticated = async () => {
@@ -30,44 +28,46 @@ export function Login() {
             const token = localStorage.getItem("sb-zrzlksbelolsesmacfhs-auth-token");
             const tokenData = token ? JSON.parse(token) : null;
 
-            if (tokenData || tokenData.access_token === session?.access_token) {
+            if (session && tokenData.access_token === session?.access_token) {
                 window.location.replace("/");
             } else {
-                setIsAuthenticated(false);
+                setLoading(false); // Atualiza o estado de carregamento
             }
         };
 
         verifyAuthenticated();
-    }, []); 
-    
-    if (!isAuthenticated) {
-        return;
+    }, []);
+
+    // Se ainda estiver carregando, você pode retornar um loading ou uma mensagem
+    if (loading) {
+        return <div>Carregando...</div>; // Ou um spinner de carregamento
     }
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
             const { email, password } = values;
             const { error } = await supabase.auth.signInWithPassword({ email, password });
-           
+
             if (error) throw error;
-              
+
             Swal.fire({
                 position: "center",
                 icon: "success",
                 title: "Logado com sucesso!",
                 showConfirmButton: false,
-                timer: 1500
-              });
-                setTimeout(() => {
-                    window.location.replace("/")
-                }, 1510);
+                timer: 1500,
+                timerProgressBar: true,
+            });
+            setTimeout(() => {
+                window.location.replace("/");
+            }, 1500);
         } catch (error) {
             Swal.fire({
                 title: 'Ops!',
                 text: 'Email ou senha incorretos!',
                 icon: 'error',
                 confirmButtonText: 'Ok'
-              })
+            });
             console.log("Login", error);
         }
     };
@@ -77,28 +77,28 @@ export function Login() {
             <Header />
             <div className="flex items-center pb-[15vh] justify-center min-h-screen bg-gray-600">
                 <div className="bg-white p-8 rounded-lg shadow-md w-96 mx-4">
-                    <h2 className="text-2xl font-bold text-center mb-6">Entrar</h2>
+                    <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">Entrar</h2>
                     <form onSubmit={form.handleSubmit(onSubmit)}>
-                        <div className="mb-4 text-base">
+                        <div className="mb-4 text-base text-gray-700">
                             <label className="block text-gray-700" htmlFor="email">Email</label>
                             <input
                                 type="text"
                                 id="email"
                                 {...form.register("email")}
-                                className="w-full p-2 border border-gray-300 rounded outline-blue-600"
+                                className="w-full p-2 border border-gray-300 rounded outline-blue-600 transition-colors"
                                 placeholder="Seu email..."
                             />
                             {form.formState.errors.email && (
                                 <span className="text-red-500 text-sm">{form.formState.errors.email.message}</span>
                             )}
                         </div>
-                        <div className="mb-6 text-base">
+                        <div className="mb-6 text-base text-gray-700">
                             <label className="block text-gray-700" htmlFor="password">Senha</label>
                             <input
                                 type="password"
                                 id="password"
                                 {...form.register("password")}
-                                className="w-full p-2 border border-gray-300 rounded outline-blue-600"
+                                className="w-full p-2 border border-gray-300 rounded outline-blue-600 transition-colors"
                                 placeholder="Sua senha"
                             />
                             {form.formState.errors.password && (
@@ -111,7 +111,6 @@ export function Login() {
                     </form>
                 </div>
             </div>
-            
         </>
     );
 }

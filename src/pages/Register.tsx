@@ -1,8 +1,10 @@
 import { useForm } from "react-hook-form";
 import { supabase } from "../utils/supabase";
-import { Header } from "./Header";
+import { Header } from "../components/Header";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Swal from "sweetalert2";
+
 
 const formSchema = z.object({
     email: z.string().email("Email inválido."),
@@ -19,13 +21,38 @@ export function Register() {
     });
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
+        
         try {
             const { email, password } = values;
             const { error } = await supabase.auth.signUp({ email, password });
             if (error) throw error;
+            Swal.fire({
+                title: 'Ebaa..',
+                text: 'Aluno cadastrado!',
+                icon: 'success',
+                confirmButtonText: 'Ok',
+                confirmButtonColor: 'blue',
+                timerProgressBar: true,
+                timer: 3000,
+            });
 
-            window.location.replace('/')
+            setTimeout(() => {
+                window.location.href = '/'
+            }, 3000);
+
         } catch (error) {
+            const stat = ({status: error})
+            if(JSON.stringify(stat).slice(63,66) === "422") {
+                Swal.fire({
+                    title: 'Ops..',
+                    text: 'Aluno já cadastrado!',
+                    icon: 'error',
+                    confirmButtonText: 'Ok',
+                    confirmButtonColor: 'blue',
+                    timerProgressBar: true,
+                    timer: 3000,
+                });
+            }
             console.log("Register", error);
         }
     };
@@ -34,7 +61,7 @@ export function Register() {
         <>
             <Header />
             <div className="flex items-center pb-[15vh] justify-center min-h-screen bg-gray-600">
-                <div className="bg-white p-8 rounded-lg shadow-md w-96 mx-4">
+                <div className="bg-white p-8 rounded-lg shadow-md w-96 mx-4 text-gray-700">
                     <h2 className="text-2xl font-bold text-center mb-6">Cadastrar</h2>
                     <form onSubmit={form.handleSubmit(onSubmit)}>
                         <div className="mb-4 text-base">
@@ -63,7 +90,7 @@ export function Register() {
                                 <span className="text-red-500 text-sm">{form.formState.errors.password.message}</span>
                             )}
                         </div>
-                        <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                        <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition-colors">
                             Criar Conta
                         </button>
                     </form>

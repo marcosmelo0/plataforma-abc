@@ -7,22 +7,23 @@ export function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [userInitials, setUserInitials] = useState<string | null>(null);
     const [userName, setUserName] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true); // New loading state
+    const [loading, setLoading] = useState(true);
+    const [isAdmin, setIsAdmin] = useState(false); 
     const location = useLocation();
 
     const fetchUserProfile = async () => {
-        setLoading(true); // Start loading
+        setLoading(true);
         try {
             const { data: { user } } = await supabase.auth.getUser();
 
             if (user && user.id) {
                 const { data: profile } = await supabase
                     .from('user_profiles')
-                    .select('name')
+                    .select('name, is_super_admin') 
                     .eq('id', user.id)
                     .single();
 
-                if (profile && profile.name) {
+                if (profile) {
                     const names = profile.name.split(' ');
                     const initials = names
                         .slice(0, 2)
@@ -30,28 +31,33 @@ export function Header() {
                         .join('');
                     setUserInitials(initials);
                     setUserName(profile.name);
+
+                    
+                    setIsAdmin(profile.is_super_admin);
                 } else {
                     setUserInitials("?");
                     setUserName("Usuário");
+                    setIsAdmin(false);
                 }
             } else {
                 setUserInitials("?");
                 setUserName("Usuário");
+                setIsAdmin(false);
             }
         } catch (error) {
             console.error("Error fetching user profile:", error);
             setUserInitials("?");
             setUserName("Usuário");
+            setIsAdmin(false);
         } finally {
-            setLoading(false); // End loading
+            setLoading(false);
         }
     };
 
     const handleLogout = async () => {
         try {
-            console.log("Logout button clicked"); // Ensure this is printed
             await supabase.auth.signOut();
-            window.location.href = '/';
+            window.location.href = '/login';
         } catch (error) {
             console.error("Logout failed:", error);
         }
@@ -63,6 +69,7 @@ export function Header() {
         } else {
             setUserInitials(null);
             setUserName(null);
+            setIsAdmin(false);
         }
     }, [location]);
 
@@ -80,7 +87,7 @@ export function Header() {
                         aria-haspopup="true"
                         aria-expanded={isMenuOpen}
                         disabled={loading}
-                        style={{ zIndex: 1000 }} // Ensure the button is clickable
+                        style={{ zIndex: 1000 }} 
                     >
                         {loading ? "..." : (userInitials || "?")}
                     </button>
@@ -90,10 +97,18 @@ export function Header() {
                             <div className="p-2 border-b border-gray-200">
                                 <p className="text-gray-700 text-base text-nowrap">Bem-vindo, {userName || "Usuário"}</p>
                             </div>
+                            {isAdmin && (
+                                <a
+                                    href="/admin-report"
+                                    className="block px-4 py-2 text-gray-700 hover:bg-gray-200 w-full text-left"
+                                >
+                                    Ver Relatório
+                                </a>
+                            )}
                             <button
                                 onClick={handleLogout}
                                 className="block px-4 py-2 text-gray-700 hover:bg-gray-200 w-full text-left"
-                                style={{ zIndex: 2000 }} // Ensure the button is clickable
+                                style={{ zIndex: 2000 }}
                             >
                                 Sair
                             </button>

@@ -1,7 +1,6 @@
 import { gql, useQuery } from "@apollo/client";
 import { Lesson } from "./Lesson";
 
-
 const GET_LESSSONS_QUERY = gql`
     query {
         aulas(orderBy: publishedAt_ASC, stage: PUBLISHED) {
@@ -14,6 +13,8 @@ const GET_LESSSONS_QUERY = gql`
     }
 `;
 
+
+
 interface GetLessonsQueryResponse {
     aulas: {
         id: string;
@@ -24,14 +25,16 @@ interface GetLessonsQueryResponse {
     }[];
 }
 
+
+
 interface SidebarProps {
     completedLessons: string[];
     updateCompletedLessons: (lessonId: string) => void;
 }
 
 export function Sidebar({ completedLessons, updateCompletedLessons }: SidebarProps) {
-    const { data } = useQuery<GetLessonsQueryResponse>(GET_LESSSONS_QUERY);
-
+    const { data: lessonsData } = useQuery<GetLessonsQueryResponse>(GET_LESSSONS_QUERY);
+    
     const handleLessonClick = (lessonId: string) => {
         updateCompletedLessons(lessonId);
     };
@@ -43,13 +46,15 @@ export function Sidebar({ completedLessons, updateCompletedLessons }: SidebarPro
             </span>
 
             <div>
-                {data?.aulas.map(lesson => {
+                {lessonsData?.aulas.map(lesson => {
                     const isCompleted = completedLessons.includes(lesson.id);
+                   
+
                     return (
                         <div 
                             key={lesson.id} 
                             className={`p-4 mb-4 rounded ${isCompleted ? 'bg-green-500 text-white' : 'bg-gray-800 text-gray-200'}`}
-                            onClick={() => handleLessonClick(lesson.id)} // Chama a função ao clicar
+                            onClick={() => handleLessonClick(lesson.id)}
                         >
                             <Lesson
                                 title={lesson.title}
@@ -58,6 +63,7 @@ export function Sidebar({ completedLessons, updateCompletedLessons }: SidebarPro
                                 type={lesson.lessonType}
                                 isCompleted={isCompleted}
                             />
+
                         </div>
                     );
                 })}

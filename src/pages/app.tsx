@@ -26,7 +26,6 @@ export function Event() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
-
     useEffect(() => {
         const verifyAuthenticated = async () => {
             const { data: { session } } = await supabase.auth.getSession();
@@ -44,7 +43,6 @@ export function Event() {
     }, []); 
 
     useEffect(() => {
-        // Verifica se as aulas concluídas estão sendo carregadas corretamente
         const fetchCompletedLessons = async () => {
             const token = localStorage.getItem("sb-zrzlksbelolsesmacfhs-auth-token");
             const userData = token ? JSON.parse(token) : null;
@@ -59,7 +57,6 @@ export function Event() {
                 if (error) {
                     console.error("Erro ao buscar aulas concluídas:", error);
                 } else if (records.length > 0) {
-                    console.log("Aulas concluídas:", records[0].aulas_id);
                     setCompletedLessons(records[0].aulas_id); 
                 }
             }

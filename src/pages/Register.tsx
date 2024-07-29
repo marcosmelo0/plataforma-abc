@@ -5,7 +5,7 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Swal from "sweetalert2";
 
-// Definindo o esquema Zod para validação do formulário
+
 const formSchema = z.object({
     name: z.string().min(1, "O nome é obrigatório."),
     email: z.string().email("Email inválido."),
@@ -13,7 +13,7 @@ const formSchema = z.object({
     role: z.enum(["user", "admin"], { message: "Role deve ser 'user' ou 'admin'." })
 });
 
-// Tipo inferido do esquema Zod
+
 type FormValues = z.infer<typeof formSchema>;
 
 export function Register() {
@@ -23,7 +23,7 @@ export function Register() {
             name: "",
             email: "",
             password: "",
-            role: "user" // Default role
+            role: "user"
         }
     });
 
@@ -31,7 +31,6 @@ export function Register() {
         try {
             const { email, password, name, role } = values;
 
-            // Registra o usuário no Supabase Auth
             const { data: authData, error: authError } = await supabase.auth.signUp({
                 email,
                 password
@@ -40,7 +39,7 @@ export function Register() {
             if (authError) throw authError;
 
             if (authData.user) {
-                // Salva dados adicionais do perfil do usuário na tabela 'user_profiles'
+                
                 const { error: dbError } = await supabase
                     .from('user_profiles')
                     .upsert({ id: authData.user.id, name, is_super_admin: role === "admin" });

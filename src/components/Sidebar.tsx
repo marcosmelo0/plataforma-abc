@@ -45,13 +45,13 @@ export function Sidebar({ completedLessons, updateCompletedLessons }: SidebarPro
                 Cronograma de aulas
             </span>
 
-            <div>
+            <a>
                 {lessonsData?.aulas.map(lesson => {
                     const isCompleted = completedLessons.includes(lesson.id);
                    
 
                     return (
-                        <div 
+                        <a 
                             key={lesson.id} 
                             className={`p-4 mb-4 rounded ${isCompleted ? 'bg-green-500 text-white' : 'bg-gray-800 text-gray-200'}`}
                             onClick={() => handleLessonClick(lesson.id)}
@@ -64,10 +64,10 @@ export function Sidebar({ completedLessons, updateCompletedLessons }: SidebarPro
                                 isCompleted={isCompleted}
                             />
 
-                        </div>
+                        <a>
                     );
                 })}
-            </div>
+            <a>
         </aside>
     );
 }

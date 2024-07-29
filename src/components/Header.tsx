@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Logo } from "./Logo";
 import { supabase } from "../utils/supabase";
 
@@ -8,7 +8,7 @@ export function Header() {
     const [userInitials, setUserInitials] = useState<string | null>(null);
     const [userName, setUserName] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
-    const [isAdmin, setIsAdmin] = useState(false); // New state to track admin status
+    const [isAdmin, setIsAdmin] = useState(false); 
     const location = useLocation();
 
     const fetchUserProfile = async () => {
@@ -19,7 +19,7 @@ export function Header() {
             if (user && user.id) {
                 const { data: profile } = await supabase
                     .from('user_profiles')
-                    .select('name, is_super_admin') // Include is_super_admin in the query
+                    .select('name, is_super_admin') 
                     .eq('id', user.id)
                     .single();
 
@@ -32,7 +32,7 @@ export function Header() {
                     setUserInitials(initials);
                     setUserName(profile.name);
 
-                    // Check if the user is an admin
+                    
                     setIsAdmin(profile.is_super_admin);
                 } else {
                     setUserInitials("?");
@@ -57,7 +57,7 @@ export function Header() {
     const handleLogout = async () => {
         try {
             await supabase.auth.signOut();
-            window.location.href = '/';
+            window.location.href = '/login';
         } catch (error) {
             console.error("Logout failed:", error);
         }
@@ -69,7 +69,7 @@ export function Header() {
         } else {
             setUserInitials(null);
             setUserName(null);
-            setIsAdmin(false); // Reset admin status
+            setIsAdmin(false);
         }
     }, [location]);
 
@@ -98,12 +98,12 @@ export function Header() {
                                 <p className="text-gray-700 text-base text-nowrap">Bem-vindo, {userName || "Usuário"}</p>
                             </div>
                             {isAdmin && (
-                                <Link
-                                    to="/admin-report" // Route for the admin report
+                                <a
+                                    href="/admin-report"
                                     className="block px-4 py-2 text-gray-700 hover:bg-gray-200 w-full text-left"
                                 >
                                     Ver Relatório
-                                </Link>
+                                </a>
                             )}
                             <button
                                 onClick={handleLogout}

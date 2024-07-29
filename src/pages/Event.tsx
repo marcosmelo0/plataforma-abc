@@ -44,7 +44,7 @@ export function Event() {
     }, []); 
 
     useEffect(() => {
-        // Verifica se as aulas concluídas estão sendo carregadas corretamente
+       
         const fetchCompletedLessons = async () => {
             const token = localStorage.getItem("sb-zrzlksbelolsesmacfhs-auth-token");
             const userData = token ? JSON.parse(token) : null;

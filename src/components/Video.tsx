@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { DefaultUi, Player, Youtube } from "@vime/react";
 import { CaretRight, CheckCircle, CircleNotch, FileArrowDown, Lightning } from "phosphor-react";
 import { gql, useQuery } from "@apollo/client";
@@ -29,7 +30,7 @@ interface GetLessonBySlugResponse {
         id: string;
         title: string;
         videoId: string;
-        description: string;
+        description: string | null;
         teacher: {
             bio: string;
             avatarURL: string;
@@ -152,6 +153,15 @@ export function Video(props: VideoProps) {
         );
     }
 
+    const renderDescriptionWithLinks = () => {
+        const description = data?.aula.description || '';
+        const descriptionWithLinks = description.replace(
+            /(\b(https?|ftp):\/\/[^\s()]+\b)/gi,
+            '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+        );
+        return { __html: descriptionWithLinks };
+    };
+
     return (
         <div className="flex-1 mt-4 mx-2">
             <div className="bg-black flex justify-center">
@@ -163,11 +173,14 @@ export function Video(props: VideoProps) {
                 </div>
             </div>
             
-            <div className="flex ml-5 sm:max-w-[1100px] mt-6">
+            <div className="flex ml-5 sm:max-w-[1100px] mt-6 mb-16">
                 <div className="flex items-start gap-16">
                     <div className="flex-1">
                         <h1 className="text-2xl font-bold">{data!.aula.title}</h1>
-                        <p className="mt-4 text-gray-200 leading-relaxed">{data!.aula.description}</p>
+                        <p
+                            className="mt-4 text-gray-200 leading-relaxed"
+                            dangerouslySetInnerHTML={renderDescriptionWithLinks()}
+                        />
                         <div className="flex flex-row gap-2">
                             <button 
                                 onClick={handleMarkAsCompleted}
@@ -177,18 +190,20 @@ export function Video(props: VideoProps) {
                                 Marcar como Concluído
                             </button>
 
-                            <a href="" className="p-4 text-sm border border-blue-500 text-blue-500 flex items-center rounded font-bold uppercase gap-2 justify-center hover:bg-blue-500 hover:text-gray-900">
+                            {/* <a href="" className="p-4 text-sm border border-blue-500 text-blue-500 flex items-center rounded font-bold uppercase gap-2 justify-center hover:bg-blue-500 hover:text-gray-900">
                                 <Lightning size={24} />
                                 Ver Desafio
-                            </a>
+                            </a> */}
                         </div>
                         <div className="flex items-center gap-4 mt-6">
+                            
                             <img
                                 className="h-16 w-16 rounded-full border-2 border-blue-500"
                                 src={data!.aula.teacher.avatarURL}
                                 alt={`Imagem do professor ${data!.aula.teacher.name}`}
                             />
                             <div className="leading-relaxed">
+                                <p className="text-xs">Professor</p>
                                 <strong className="font-bold text-2xl block">{data!.aula.teacher.name}</strong>
                                 <span className="text-gray-200 text-sm block">{data!.aula.teacher.bio}</span>
                             </div>
@@ -196,7 +211,7 @@ export function Video(props: VideoProps) {
                     </div>
                 </div>
             </div>
-            <div className="grid mt-16 grid-cols-1 max-w-96 mb-20 sm:mx-5">
+            {/* <div className="grid mt-16 grid-cols-1 max-w-96 mb-20 sm:mx-5">
                 <a href="#" className="bg-gray-700 rounded flex items-stretch gap-6 hover:bg-gray-600 transition-colors">
                     <div className="bg-green-700 h-full p-6 flex items-center">
                         <FileArrowDown size={40} />
@@ -213,7 +228,7 @@ export function Video(props: VideoProps) {
                         </div>
                     </div>
                 </a>
-            </div>
+            </div> */}
         </div>
     );
 }

@@ -8,6 +8,7 @@ interface LessonProps {
     availableAt: Date;
     type: 'live' | 'class';
     isCompleted: boolean;
+
 }
 
 export function Lesson(props: LessonProps) {

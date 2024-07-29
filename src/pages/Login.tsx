@@ -20,7 +20,7 @@ export function Login() {
         }
     });
 
-    const [loading, setLoading] = useState(true); // Estado de carregamento
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const verifyAuthenticated = async () => {
@@ -31,16 +31,16 @@ export function Login() {
             if (session && tokenData.access_token === session?.access_token) {
                 window.location.replace("/");
             } else {
-                setLoading(false); // Atualiza o estado de carregamento
+                setLoading(false);
             }
         };
 
         verifyAuthenticated();
     }, []);
 
-    // Se ainda estiver carregando, você pode retornar um loading ou uma mensagem
+    
     if (loading) {
-        return <div>Carregando...</div>; // Ou um spinner de carregamento
+        return <div>Carregando...</div>;
     }
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {

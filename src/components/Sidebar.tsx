@@ -1,7 +1,6 @@
 import { gql, useQuery } from "@apollo/client";
 import { Lesson } from "./Lesson";
 
-
 const GET_LESSSONS_QUERY = gql`
     query {
         aulas(orderBy: publishedAt_ASC, stage: PUBLISHED) {
@@ -10,6 +9,18 @@ const GET_LESSSONS_QUERY = gql`
             availableAt
             title
             slug
+        }
+    }
+`;
+
+const GET_COURSES = gql`
+    query MyQuery {
+        cursos {
+            id
+            nome
+            capa {
+                url
+            }
         }
     }
 `;
@@ -24,17 +35,30 @@ interface GetLessonsQueryResponse {
     }[];
 }
 
+interface GetCoursesQueryResponse {
+    cursos: {
+        id: string;
+        nome: string;
+        capa: {
+            url: string;
+        }
+    }[];
+}
+
 interface SidebarProps {
     completedLessons: string[];
     updateCompletedLessons: (lessonId: string) => void;
 }
 
 export function Sidebar({ completedLessons, updateCompletedLessons }: SidebarProps) {
-    const { data } = useQuery<GetLessonsQueryResponse>(GET_LESSSONS_QUERY);
+    const { data: lessonsData } = useQuery<GetLessonsQueryResponse>(GET_LESSSONS_QUERY);
+    const { data: coursesData } = useQuery<GetCoursesQueryResponse>(GET_COURSES);
 
     const handleLessonClick = (lessonId: string) => {
         updateCompletedLessons(lessonId);
     };
+
+    
 
     return (
         <aside className="lg:max-w-[348px] bg-gray-700 p-6 border-l border-gray-600 mt-10 sm:mt-0">
@@ -43,13 +67,15 @@ export function Sidebar({ completedLessons, updateCompletedLessons }: SidebarPro
             </span>
 
             <div>
-                {data?.aulas.map(lesson => {
+                {lessonsData?.aulas.map(lesson => {
                     const isCompleted = completedLessons.includes(lesson.id);
+                    const course = coursesData?.cursos.find(course => course.id === lesson.slug); // Assuming `slug` is used to find the course
+
                     return (
                         <div 
                             key={lesson.id} 
                             className={`p-4 mb-4 rounded ${isCompleted ? 'bg-green-500 text-white' : 'bg-gray-800 text-gray-200'}`}
-                            onClick={() => handleLessonClick(lesson.id)} // Chama a função ao clicar
+                            onClick={() => handleLessonClick(lesson.id)}
                         >
                             <Lesson
                                 title={lesson.title}
@@ -58,6 +84,13 @@ export function Sidebar({ completedLessons, updateCompletedLessons }: SidebarPro
                                 type={lesson.lessonType}
                                 isCompleted={isCompleted}
                             />
+                            {course && course.capa && (
+                                <img
+                                    src={course.capa.url}
+                                    alt={`Capa do curso ${course.nome}`}
+                                    className="w-full h-auto mt-2 rounded"
+                                />
+                            )}
                         </div>
                     );
                 })}

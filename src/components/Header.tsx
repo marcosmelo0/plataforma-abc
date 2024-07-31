@@ -77,7 +77,7 @@ export function Header() {
 
     return (
         <header className="w-full py-4 px-6 flex items-center justify-between bg-blue-700 border-b border-blue-600">
-            <Logo />
+            <Logo  />
 
             {showProfileButton && (
                 <div className="relative">

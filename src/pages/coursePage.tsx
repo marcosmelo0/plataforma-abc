@@ -65,7 +65,7 @@ const CoursePage = () => {
                         />
                     )}
                 </div>
-                <Sidebar completedLessons={completedLessons} updateCompletedLessons={updateCompletedLessons} />
+                <Sidebar completedLessons={completedLessons} updateCompletedLessons={updateCompletedLessons} aulas={aulas} />
             </div>
         </div>
     );

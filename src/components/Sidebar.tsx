@@ -1,40 +1,50 @@
 import { gql, useQuery } from "@apollo/client";
 import { Lesson } from "./Lesson";
+import React, { useEffect } from 'react';
 
-const GET_LESSSONS_QUERY = gql`
-    query {
-        aulas(orderBy: publishedAt_ASC, stage: PUBLISHED) {
+// Função para obter o ID do curso
+const getCourseId = () => localStorage.getItem('c');
+
+const GET_COURSE_BY_ID = gql`
+    query GetCourseById($id: ID!) {
+        curso(where: { id: $id }) {
             id
-            lessonType
-            availableAt
-            title
-            slug
+            nome
+            aula {
+                id
+                title
+                slug
+                lessonType
+            }
         }
     }
 `;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function Sidebar({ completedLessons, updateCompletedLessons }: any) {
+    const idCourse = getCourseId(); // Obtém o ID do curso
 
+    const { data, loading, error, refetch } = useQuery(GET_COURSE_BY_ID, {
+        variables: { id: idCourse }, // Passa o ID do curso
+        skip: !idCourse, // Não executa a consulta se 'idCourse' não estiver definido
+    });
 
-interface GetLessonsQueryResponse {
-    aulas: {
-        id: string;
-        title: string;
-        slug: string;
-        availableAt: string;
-        lessonType: 'live' | 'class';
-    }[];
-}
+    // Atualiza as aulas quando o componente for montado ou quando idCourse mudar
+    useEffect(() => {
+        if (idCourse) {
+            refetch();
+        }
+    }, [idCourse, refetch]);
 
+    if (loading) return <p>Carregando...</p>;
+    if (error) {
+        console.error("Erro ao buscar dados:", error);
+        return <p>Erro: {error.message}</p>;
+    }
 
+    const aulas = data?.curso?.aula || [];
+    console.log(data);
 
-interface SidebarProps {
-    completedLessons: string[];
-    updateCompletedLessons: (lessonId: string) => void;
-}
-
-export function Sidebar({ completedLessons, updateCompletedLessons }: SidebarProps) {
-    const { data: lessonsData } = useQuery<GetLessonsQueryResponse>(GET_LESSSONS_QUERY);
-    
     const handleLessonClick = (lessonId: string) => {
         updateCompletedLessons(lessonId);
     };
@@ -45,29 +55,25 @@ export function Sidebar({ completedLessons, updateCompletedLessons }: SidebarPro
                 Cronograma de aulas
             </span>
 
-            <a>
-                {lessonsData?.aulas.map(lesson => {
+            <div>
+                {aulas?.map(lesson => {
                     const isCompleted = completedLessons.includes(lesson.id);
-                   
-
                     return (
-                        <a 
+                        <div 
                             key={lesson.id} 
-                            className={`p-4 mb-4 rounded ${isCompleted ? 'bg-green-500 text-white' : 'bg-gray-800 text-gray-200'}`}
+                            className={`p-4 mb-4 rounded cursor-pointer ${isCompleted ?  'bg-green-500 text-white' : 'bg-gray-800 text-gray-200'}`}
                             onClick={() => handleLessonClick(lesson.id)}
                         >
                             <Lesson
                                 title={lesson.title}
                                 slug={lesson.slug}
-                                availableAt={new Date(lesson.availableAt)}
                                 type={lesson.lessonType}
                                 isCompleted={isCompleted}
                             />
-
-                        <a>
+                        </div>
                     );
                 })}
-            <a>
+            </div>
         </aside>
     );
 }

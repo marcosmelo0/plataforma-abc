@@ -5,7 +5,6 @@ import { Video } from '../components/Video';
 import { Sidebar } from '../components/Sidebar';
 import { Header } from '../components/Header';
 
-
 const GET_COURSE_BY_ID = gql`
     query GetCourseById($id: ID!) {
         curso(where: { id: $id }) {
@@ -28,8 +27,6 @@ const CoursePage = () => {
 
     const [completedLessons, setCompletedLessons] = React.useState<string[]>([]);
 
-    
-
     const updateCompletedLessons = (lessonId: string) => {
         setCompletedLessons(prev => {
             if (prev.includes(lessonId)) {
@@ -47,8 +44,7 @@ const CoursePage = () => {
         return <p>Erro: {error.message}</p>;
     }
 
-    // Verifique se data e data.curso.aulas estão definidos antes de usar map
-    const aulas = data?.curso?.aula || []; // Corrigido para 'aula' no singular
+    const aulas = data?.curso?.aula || []; 
 
     return (
         <div className="flex flex-col">
@@ -56,12 +52,11 @@ const CoursePage = () => {
             
             <div className="flex flex-1 flex-col lg:flex-row">
                 <div className="flex-1">
-                    {/* Renderiza apenas o primeiro vídeo */}
+                    
                     {aulas.length > 0 && (
                         <Video 
                             key={aulas[0].id} 
-                            lessonSlug={aulas[0].slug} // Usa o slug da primeira aula
-                            updateCompletedLessons={updateCompletedLessons} 
+                            lessonSlug={aulas[0].slug} 
                         />
                     )}
                 </div>

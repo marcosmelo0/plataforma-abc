@@ -5,9 +5,8 @@ import { gql, useQuery } from "@apollo/client";
 import '@vime/core/themes/default.css';
 import { supabase } from "../utils/supabase";
 import Swal from "sweetalert2";
-import { useParams } from "react-router-dom"; // Importando useParams para pegar parâmetros da URL
+import { useParams } from "react-router-dom";
 
-// Consulta GraphQL para obter a aula pelo slug
 const GET_LESSON_BY_SLUG_QUERY = gql`
     query GetLessonSlug($slug: String) {
         aula(where: {slug: $slug}) {
@@ -27,7 +26,7 @@ const GET_LESSON_BY_SLUG_QUERY = gql`
     }
 `;
 
-// Consulta GraphQL para obter todas as aulas de um curso
+
 const GET_LESSONS_BY_COURSE_ID = gql`
     query GetLessonsByCourseId($courseId: ID!) {
         aulas(where: { curse: { id: $courseId } }) {
@@ -47,7 +46,6 @@ const GET_LESSONS_BY_COURSE_ID = gql`
     }
 `;
 
-// Interface para a resposta da consulta
 interface GetLessonBySlugResponse {
     aula: {
         id: string;
@@ -65,7 +63,6 @@ interface GetLessonBySlugResponse {
     }
 }
 
-// Interface para a resposta da consulta de aulas
 interface GetLessonsByCourseIdResponse {
     aulas: {
         id: string;
@@ -83,25 +80,25 @@ interface GetLessonsByCourseIdResponse {
     }[];
 }
 
-// Propriedades do componente Video
+
 interface VideoProps {
-    lessonSlug?: string; // slug pode ser opcional
+    lessonSlug?: string;
     updateCompletedLessons: (lessonId: string) => void;
 }
 
 export function Video(props: VideoProps) {
     const { lessonSlug } = props;
-    const { id } = useParams<{ id: string }>(); // Pega o ID do curso da URL
+    const { id } = useParams<{ id: string }>(); 
 
-    // Busca a aula pelo slug ou todas as aulas do curso se o slug não for passado
+    
     const { data: lessonData, loading: loadingLesson } = useQuery<GetLessonBySlugResponse>(GET_LESSON_BY_SLUG_QUERY, {
         variables: { slug: lessonSlug },
-        skip: !lessonSlug, // Ignora a consulta se o slug não for passado
+        skip: !lessonSlug, 
     });
 
     const { data: allLessonsData, loading: loadingAllLessons } = useQuery<GetLessonsByCourseIdResponse>(GET_LESSONS_BY_COURSE_ID, {
-        variables: { courseId: id }, // Usando o ID da URL
-        skip: !!lessonSlug, // Ignora a consulta se o slug for passado
+        variables: { courseId: id }, 
+        skip: !!lessonSlug, 
     });
 
     const loading = loadingLesson || loadingAllLessons;
@@ -111,7 +108,7 @@ export function Video(props: VideoProps) {
     const alunoId = userData ? userData.user.id : null;
 
     const handleMarkAsCompleted = async () => {
-        const lesson = lessonData?.aula || allLessonsData?.aulas[0]; // Pega a aula atual ou a primeira aula
+        const lesson = lessonData?.aula || allLessonsData?.aulas[0]; 
         if (lesson && alunoId) {
             try {
                 const { data: existingRecords, error: fetchError } = await supabase
@@ -206,7 +203,7 @@ export function Video(props: VideoProps) {
         );
     }
 
-    const lesson = lessonData?.aula || allLessonsData?.aulas[0]; // Pega a aula atual ou a primeira aula
+    const lesson = lessonData?.aula || allLessonsData?.aulas[0]; 
 
     if (!lesson) {
         window.location.replace('/')

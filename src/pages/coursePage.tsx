@@ -11,7 +11,7 @@ const GET_COURSE_BY_ID = gql`
         curso(where: { id: $id }) {
             id
             nome
-            aula {
+            aula (orderBy: publishedAt_ASC) { 
                 id
                 title
                 slug

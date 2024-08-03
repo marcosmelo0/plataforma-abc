@@ -26,7 +26,6 @@ const GET_LESSON_BY_SLUG_QUERY = gql`
     }
 `;
 
-
 const GET_LESSONS_BY_COURSE_ID = gql`
     query GetLessonsByCourseId($courseId: ID!) {
         aulas(where: { curse: { id: $courseId } }) {
@@ -80,7 +79,6 @@ interface GetLessonsByCourseIdResponse {
     }[];
 }
 
-
 interface VideoProps {
     lessonSlug?: string;
     updateCompletedLessons: (lessonId: string) => void;
@@ -90,15 +88,14 @@ export function Video(props: VideoProps) {
     const { lessonSlug } = props;
     const { id } = useParams<{ id: string }>(); 
 
-    
     const { data: lessonData, loading: loadingLesson } = useQuery<GetLessonBySlugResponse>(GET_LESSON_BY_SLUG_QUERY, {
         variables: { slug: lessonSlug },
-        skip: !lessonSlug, 
+        skip: !lessonSlug,
     });
 
     const { data: allLessonsData, loading: loadingAllLessons } = useQuery<GetLessonsByCourseIdResponse>(GET_LESSONS_BY_COURSE_ID, {
-        variables: { courseId: id }, 
-        skip: !!lessonSlug, 
+        variables: { courseId: id },
+        skip: !!lessonSlug,
     });
 
     const loading = loadingLesson || loadingAllLessons;
@@ -116,7 +113,7 @@ export function Video(props: VideoProps) {
                     .select('aulas_id')
                     .eq('aluno_id', alunoId)
                     .eq('curso_id', lesson.curse.id);
-    
+
                 if (fetchError) throw fetchError;
 
                 if (existingRecords.length > 0) {
@@ -124,7 +121,6 @@ export function Video(props: VideoProps) {
 
                     if (aulasIdArray.includes(lesson.id)) {
                         const updatedAulasId = aulasIdArray.filter((id: string) => id !== lesson.id);
-
                         await supabase
                             .from('aulasCompletas')
                             .update({ aulas_id: updatedAulasId })
@@ -142,7 +138,6 @@ export function Video(props: VideoProps) {
                         });
                     } else {
                         const updatedAulasId = [...aulasIdArray, lesson.id];
-
                         await supabase
                             .from('aulasCompletas')
                             .update({ aulas_id: updatedAulasId })
@@ -206,7 +201,7 @@ export function Video(props: VideoProps) {
     const lesson = lessonData?.aula || allLessonsData?.aulas[0]; 
 
     if (!lesson) {
-        window.location.replace('/')
+        window.location.replace('/');
     }
 
     const renderDescriptionWithLinks = () => {
@@ -228,7 +223,6 @@ export function Video(props: VideoProps) {
                     </Player>
                 </div>
             </div>
-            
             <div className="flex ml-5 sm:max-w-[1100px] mt-6 mb-16">
                 <div className="flex items-start gap-16">
                     <div className="flex-1">

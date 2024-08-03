@@ -41,8 +41,7 @@ const CoursePage = () => {
     useEffect(() => {
         const fetchCompletedLessons = async () => {
             const userId = (await supabase.auth.getSession()).data.session?.user?.id;
-            if (!userId) return; // Adicionado tratamento para usuário não autenticado
-
+            if (!userId) return; 
             const { data: completedData, error: fetchError } = await supabase
                 .from('aulasCompletas')
                 .select('curso_id, aulas_id')

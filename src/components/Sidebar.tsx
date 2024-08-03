@@ -6,24 +6,26 @@ const getCourseId = () => localStorage.getItem('c');
 
 const GET_COURSE_BY_ID = gql`
     query GetCourseById($id: ID!) {
-        curso(where: { id: $id }) {
+        curso(where: {id: $id}) {
             id
             nome
-            aula {
+            aula(orderBy: publishedAt_ASC) {
                 id
+                lessonType
+                availableAt
                 title
                 slug
-                lessonType
             }
         }
     }
 `;
 
+
 interface LessonType {
     id: string;
     title: string;
     slug: string;
-    lessonType: 'live' | 'class'; // Presumo que esses sejam os valores possíveis
+    lessonType: 'live' | 'class'; 
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { gql, useQuery } from "@apollo/client";
 import { Video } from '../components/Video'; 
@@ -11,7 +12,7 @@ const GET_COURSE_BY_ID = gql`
         curso(where: { id: $id }) {
             id
             nome
-            aula (orderBy: publishedAt_ASC) { 
+            aula(orderBy: publishedAt_ASC) {
                 id
                 title
                 slug
@@ -26,43 +27,40 @@ const CoursePage = () => {
         variables: { id },
     });
 
-    const [completedLessons, setCompletedLessons] = React.useState<string[]>([]);
+    const [completedLessons, setCompletedLessons] = useState<string[]>([]);
 
     const updateCompletedLessons = (lessonId: string) => {
         setCompletedLessons(prev => {
-            if (prev.includes(lessonId)) {
-                return prev.filter(id => id !== lessonId);
-            } else {
-                return [...prev, lessonId];
-            }
+            const updatedCompletedLessons = prev.includes(lessonId)
+                ? prev.filter(id => id !== lessonId)
+                : [...prev, lessonId];
+                
+            localStorage.setItem('completedLessons', JSON.stringify(updatedCompletedLessons));
+            return updatedCompletedLessons;
         });
     };
 
     useEffect(() => {
-        const fetchCompletedLessons = async () => {
-            const userId = (await supabase.auth.getSession()).data.session?.user?.id;
-            if (!userId) return; 
-            const { data: completedData, error: fetchError } = await supabase
-                .from('aulasCompletas')
-                .select('curso_id, aulas_id')
-                .eq('aluno_id', userId);
+        const userToken = localStorage.getItem('sb-zrzlksbelolsesmacfhs-auth-token');
+        const userId = userToken ? JSON.parse(atob(userToken.split('.')[1])).sub : null;
 
-            if (fetchError) {
-                console.error("Erro ao buscar aulas completas:", fetchError);
+        const fetchCompletedLessons = async () => {
+            if (!userId || !id) return;
+
+            const { data: completedLessonsData, error } = await supabase
+                .from('aulasCompletas')
+                .select('aulas_id')
+                .eq('aluno_id', userId)
+                .eq('curso_id', id);
+
+            if (error) {
+                console.error("Erro ao buscar aulas completas:", error);
                 return;
             }
 
-            if (completedData.length > 0) {
-                const courseData = completedData.find(course => course.curso_id === id);
-                if (courseData && courseData.aulas_id) {
-                    const storageData = {
-                        curso_id: courseData.curso_id,
-                        aulas_id: courseData.aulas_id,
-                    };
-                    localStorage.setItem('curso_info', JSON.stringify(storageData));
-                    setCompletedLessons(courseData.aulas_id);
-                }
-            }
+            const completedLessonIds = completedLessonsData.map((lesson: any) => lesson.aulas_id);
+            setCompletedLessons(completedLessonIds);
+            localStorage.setItem('completedLessons', JSON.stringify(completedLessonIds));
         };
 
         fetchCompletedLessons();
@@ -74,23 +72,25 @@ const CoursePage = () => {
         return <p>Erro: {error.message}</p>;
     }
 
-    const aulas = data?.curso?.aula || []; 
+    const aulas = data?.curso?.aula || [];
 
     return (
         <div className="flex flex-col">
             <Header />
-            
             <div className="flex flex-1 flex-col lg:flex-row">
                 <div className="flex-1">
                     {aulas.length > 0 && (
-                        <Video 
-                            key={aulas[0].id} 
+                        <Video
+                            key={aulas[0].id}
                             lessonSlug={aulas[0].slug}
-                            updateCompletedLessons={updateCompletedLessons} // Corrigido para passar a função
+                            updateCompletedLessons={updateCompletedLessons}
                         />
                     )}
                 </div>
-                <Sidebar completedLessons={completedLessons} updateCompletedLessons={updateCompletedLessons} aulas={aulas} />
+                <Sidebar
+                    completedLessons={completedLessons}
+                    updateCompletedLessons={updateCompletedLessons}
+                />
             </div>
         </div>
     );

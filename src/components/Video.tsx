@@ -226,7 +226,7 @@ export function Video(props: VideoProps) {
             <div className="flex flex-col items-start ml-5 mt-6 mb-16">
                 <div className="flex-1 max-w-full">
                     <h1 className="text-2xl font-bold">{lesson!.title}</h1>
-                    <div className="mt-4 text-gray-200 leading-relaxed break-words md:px-6 max-w-full overflow-x-auto">
+                    <div className="mt-4 text-gray-200 leading-relaxed break-words max-w-full overflow-x-auto">
                         <p
                             className="text-sm md:text-base"
                             dangerouslySetInnerHTML={renderDescriptionWithLinks()}

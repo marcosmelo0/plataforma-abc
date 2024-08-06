@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { gql, useQuery } from "@apollo/client";
 import { Lesson } from "./Lesson";
 

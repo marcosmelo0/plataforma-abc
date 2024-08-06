@@ -86,7 +86,7 @@ interface VideoProps {
 
 export function Video(props: VideoProps) {
     const { lessonSlug } = props;
-    const { id } = useParams<{ id: string }>(); 
+    const { id } = useParams<{ id: string }>();
 
     const { data: lessonData, loading: loadingLesson } = useQuery<GetLessonBySlugResponse>(GET_LESSON_BY_SLUG_QUERY, {
         variables: { slug: lessonSlug },
@@ -105,7 +105,7 @@ export function Video(props: VideoProps) {
     const alunoId = userData ? userData.user.id : null;
 
     const handleMarkAsCompleted = async () => {
-        const lesson = lessonData?.aula || allLessonsData?.aulas[0]; 
+        const lesson = lessonData?.aula || allLessonsData?.aulas[0];
         if (lesson && alunoId) {
             try {
                 const { data: existingRecords, error: fetchError } = await supabase
@@ -144,7 +144,7 @@ export function Video(props: VideoProps) {
                             .eq('aluno_id', alunoId)
                             .eq('curso_id', lesson.curse.id);
 
-                        props.updateCompletedLessons(lesson.id); 
+                        props.updateCompletedLessons(lesson.id);
                         Swal.fire({
                             position: "top",
                             icon: "success",
@@ -198,7 +198,7 @@ export function Video(props: VideoProps) {
         );
     }
 
-    const lesson = lessonData?.aula || allLessonsData?.aulas[0]; 
+    const lesson = lessonData?.aula || allLessonsData?.aulas[0];
 
     if (!lesson) {
         window.location.replace('/');
@@ -223,34 +223,34 @@ export function Video(props: VideoProps) {
                     </Player>
                 </div>
             </div>
-            <div className="flex ml-5 sm:max-w-[1100px] mt-6 mb-16">
-                <div className="flex items-start gap-16">
-                    <div className="flex-1">
-                        <h1 className="text-2xl font-bold">{lesson!.title}</h1>
+            <div className="flex flex-col items-start ml-5 mt-6 mb-16">
+                <div className="flex-1 max-w-full">
+                    <h1 className="text-2xl font-bold">{lesson!.title}</h1>
+                    <div className="mt-4 text-gray-200 leading-relaxed break-words md:px-6 max-w-full overflow-x-auto">
                         <p
-                            className="mt-4 text-gray-200 leading-relaxed"
+                            className="text-sm md:text-base"
                             dangerouslySetInnerHTML={renderDescriptionWithLinks()}
                         />
-                        <div className="flex flex-row gap-2">
-                            <button 
-                                onClick={handleMarkAsCompleted}
-                                className="p-2 text-sm bg-green-500 flex items-center rounded font-bold uppercase gap-2 justify-center hover:bg-green-700 transition-colors"
-                            >
-                                <CheckCircle size={31} />
-                                Marcar como Concluído
-                            </button>
-                        </div>
-                        <div className="flex items-center gap-4 mt-6">
-                            <img
-                                className="h-16 w-16 rounded-full border-2 border-blue-500"
-                                src={lesson!.teacher.avatarURL}
-                                alt={`Imagem do professor ${lesson!.teacher.name}`}
-                            />
-                            <div className="leading-relaxed">
-                                <p className="text-xs">Professor</p>
-                                <strong className="font-bold text-2xl block">{lesson!.teacher.name}</strong>
-                                <span className="text-gray-200 text-sm block">{lesson!.teacher.bio}</span>
-                            </div>
+                    </div>
+                    <div className="flex flex-row gap-2 mt-4">
+                        <button 
+                            onClick={handleMarkAsCompleted}
+                            className="p-2 text-sm bg-green-500 flex items-center rounded font-bold uppercase gap-2 justify-center hover:bg-green-700 transition-colors"
+                        >
+                            <CheckCircle size={31} />
+                            Marcar como Concluído
+                        </button>
+                    </div>
+                    <div className="flex items-center gap-4 mt-6">
+                        <img
+                            className="h-16 w-16 rounded-full border-2 border-blue-500"
+                            src={lesson!.teacher.avatarURL}
+                            alt={`Imagem do professor ${lesson!.teacher.name}`}
+                        />
+                        <div className="leading-relaxed">
+                            <p className="text-xs">Professor</p>
+                            <strong className="font-bold text-2xl block">{lesson!.teacher.name}</strong>
+                            <span className="text-gray-200 text-sm block">{lesson!.teacher.bio}</span>
                         </div>
                     </div>
                 </div>

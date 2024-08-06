@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect } from 'react';
 import { gql, useQuery } from "@apollo/client";
 import { Lesson } from "./Lesson";
-import { useEffect } from "react";
 
 const getCourseId = () => localStorage.getItem('c');
 
 const GET_COURSE_BY_ID = gql`
     query GetCourseById($id: ID!) {
-        curso(where: {id: $id}) {
+        curso(where: { id: $id }) {
             id
             nome
             aula(orderBy: publishedAt_ASC) {
@@ -20,18 +21,20 @@ const GET_COURSE_BY_ID = gql`
     }
 `;
 
-
 interface LessonType {
     id: string;
     title: string;
     slug: string;
-    lessonType: 'live' | 'class'; 
+    lessonType: 'live' | 'class';
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function Sidebar({ completedLessons, updateCompletedLessons }: any) {
-    const idCourse = getCourseId();
+interface SidebarProps {
+    completedLessons: string[];
+    updateCompletedLessons: (lessonId: string) => void;
+}
 
+export function Sidebar({ completedLessons, updateCompletedLessons }: SidebarProps) {
+    const idCourse = getCourseId();
     const { data, loading, error, refetch } = useQuery(GET_COURSE_BY_ID, {
         variables: { id: idCourse },
         skip: !idCourse,
@@ -50,7 +53,6 @@ export function Sidebar({ completedLessons, updateCompletedLessons }: any) {
     }
 
     const aulas: LessonType[] = data?.curso?.aula || [];
-    console.log(data);
 
     const handleLessonClick = (lessonId: string) => {
         updateCompletedLessons(lessonId);
@@ -64,12 +66,12 @@ export function Sidebar({ completedLessons, updateCompletedLessons }: any) {
             <span>Aulas:</span>
 
             <div>
-                {aulas?.map((lesson: LessonType) => {
+                {aulas.map((lesson: LessonType) => {
                     const isCompleted = completedLessons.includes(lesson.id);
                     return (
                         <div 
                             key={lesson.id} 
-                            className={`p-1 mb-2 rounded cursor-pointer ${isCompleted ?  'bg-green-500 text-white' : ' text-gray-200'}`}
+                            className={`p-1 mb-2 rounded cursor-pointer ${isCompleted ? 'bg-green-500 text-white' : 'text-gray-200'}`}
                             onClick={() => handleLessonClick(lesson.id)}
                         >
                             <Lesson

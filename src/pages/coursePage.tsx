@@ -12,7 +12,7 @@ const GET_COURSE_BY_ID = gql`
         curso(where: { id: $id }) {
             id
             nome
-            aula(orderBy: publishedAt_ASC) {
+            aula {
                 id
                 title
                 slug
@@ -73,6 +73,7 @@ const CoursePage = () => {
     }
 
     const aulas = data?.curso?.aula || [];
+    console.log(data)
 
     return (
         <div className="flex flex-col">

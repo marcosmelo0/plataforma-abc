@@ -19,7 +19,9 @@ const GET_LESSON_BY_SLUG_QUERY = gql`
                 bio
                 avatarURL
             }
-            
+        curso {
+            id
+        }
         }
     }
 `;
@@ -54,7 +56,7 @@ interface GetLessonBySlugResponse {
             avatarURL: string;
             name: string;
         }
-        curse: {
+        curso: {
             id: string;
         }
     }
@@ -84,7 +86,7 @@ interface VideoProps {
 
 export function Video(props: VideoProps) {
     const { lessonSlug } = props;
-    const { id } = useParams<{ id: string }>();
+    const { id } = useParams<{ id: string }>(); 
 
     const { data: lessonData, loading: loadingLesson } = useQuery<GetLessonBySlugResponse>(GET_LESSON_BY_SLUG_QUERY, {
         variables: { slug: lessonSlug },
@@ -102,30 +104,32 @@ export function Video(props: VideoProps) {
     const userData = token ? JSON.parse(token) : null;
     const alunoId = userData ? userData.user.id : null;
 
+    const lesson1 = lessonData || allLessonsData?.aulas[0];
+    console.log(lesson1)
     const handleMarkAsCompleted = async () => {
-        const lesson = lessonData?.aula || allLessonsData?.aulas[0];
         if (lesson && alunoId) {
             try {
                 const { data: existingRecords, error: fetchError } = await supabase
                     .from('aulasCompletas')
                     .select('aulas_id')
                     .eq('aluno_id', alunoId)
-                    .eq('curso_id', lesson.curse.id);
-
+                    .eq('curso_id', lessonData!.aula.curso.id); 
+    
                 if (fetchError) throw fetchError;
-
+    
                 if (existingRecords.length > 0) {
                     const aulasIdArray = existingRecords[0].aulas_id;
-
+    
                     if (aulasIdArray.includes(lesson.id)) {
+                        // Se já tiver a aula, remove do aulas_id
                         const updatedAulasId = aulasIdArray.filter((id: string) => id !== lesson.id);
                         await supabase
                             .from('aulasCompletas')
                             .update({ aulas_id: updatedAulasId })
                             .eq('aluno_id', alunoId)
-                            .eq('curso_id', lesson.curse.id);
-
-                        props.updateCompletedLessons(lesson.id);
+                            .eq('curso_id', lessonData!.aula.curso.id); // Corrigido para usar lesson.curse.id
+    
+                        props.updateCompletedLessons(lesson.id); // Atualiza a lista de aulas concluídas
                         Swal.fire({
                             position: "top",
                             icon: "success",
@@ -135,14 +139,15 @@ export function Video(props: VideoProps) {
                             timerProgressBar: true,
                         });
                     } else {
+                        // Se não tiver a aula, adiciona ao aulas_id
                         const updatedAulasId = [...aulasIdArray, lesson.id];
                         await supabase
                             .from('aulasCompletas')
                             .update({ aulas_id: updatedAulasId })
                             .eq('aluno_id', alunoId)
-                            .eq('curso_id', lesson.curse.id);
-
-                        props.updateCompletedLessons(lesson.id);
+                            .eq('curso_id', lessonData!.aula.curso.id); // Corrigido para usar lesson.curse.id
+    
+                        props.updateCompletedLessons(lesson.id); 
                         Swal.fire({
                             position: "top",
                             icon: "success",
@@ -153,17 +158,18 @@ export function Video(props: VideoProps) {
                         });
                     }
                 } else {
+                    // Se não houver registros, cria um novo
                     await supabase
                         .from('aulasCompletas')
                         .insert([
                             {
                                 aulas_id: [lesson.id],
-                                curso_id: lesson.curse.id,
+                                curso_id: lessonData!.aula.curso.id, // Corrigido para usar lesson.curse.id
                                 aluno_id: alunoId,
                             }
                         ]);
-
-                    props.updateCompletedLessons(lesson.id);
+    
+                    props.updateCompletedLessons(lesson.id); // Atualiza a lista de aulas concluídas
                     Swal.fire({
                         position: "top",
                         icon: "success",
@@ -184,6 +190,7 @@ export function Video(props: VideoProps) {
             }
         }
     };
+    
 
     if (loading) {
         return (
@@ -196,7 +203,7 @@ export function Video(props: VideoProps) {
         );
     }
 
-    const lesson = lessonData?.aula || allLessonsData?.aulas[0];
+    const lesson = lessonData?.aula || allLessonsData?.aulas[0]; 
 
     if (!lesson) {
         window.location.replace('/');
@@ -211,6 +218,8 @@ export function Video(props: VideoProps) {
         return { __html: descriptionWithLinks };
     };
 
+    console.log(lesson)
+
     return (
         <div className="flex-1 mt-4 mx-2">
             <div className="bg-black flex justify-center">
@@ -221,34 +230,34 @@ export function Video(props: VideoProps) {
                     </Player>
                 </div>
             </div>
-            <div className="flex flex-col items-start ml-5 mt-6 mb-16">
-                <div className="flex-1 max-w-full">
-                    <h1 className="text-2xl font-bold">{lesson!.title}</h1>
-                    <div className="mt-4 text-gray-200 leading-relaxed break-words max-w-full overflow-x-auto">
+            <div className="flex ml-5 sm:max-w-[1100px] mt-6 mb-16">
+                <div className="flex items-start gap-16">
+                    <div className="flex-1">
+                        <h1 className="text-2xl font-bold">{lesson!.title}</h1>
                         <p
-                            className="text-sm md:text-base"
+                            className="mt-4 text-gray-200 leading-relaxed"
                             dangerouslySetInnerHTML={renderDescriptionWithLinks()}
                         />
-                    </div>
-                    <div className="flex flex-row gap-2 mt-4">
-                        <button 
-                            onClick={handleMarkAsCompleted}
-                            className="p-2 text-sm bg-green-500 flex items-center rounded font-bold uppercase gap-2 justify-center hover:bg-green-700 transition-colors"
-                        >
-                            <CheckCircle size={31} />
-                            Marcar como Concluído
-                        </button>
-                    </div>
-                    <div className="flex items-center gap-4 mt-6">
-                        <img
-                            className="h-16 w-16 rounded-full border-2 border-blue-500"
-                            src={lesson!.teacher.avatarURL}
-                            alt={`Imagem do professor ${lesson!.teacher.name}`}
-                        />
-                        <div className="leading-relaxed">
-                            <p className="text-xs">Professor</p>
-                            <strong className="font-bold text-2xl block">{lesson!.teacher.name}</strong>
-                            <span className="text-gray-200 text-sm block">{lesson!.teacher.bio}</span>
+                        <div className="flex flex-row gap-2">
+                            <button 
+                                onClick={handleMarkAsCompleted}
+                                className="p-2 text-sm bg-green-500 flex items-center rounded font-bold uppercase gap-2 justify-center hover:bg-green-700 transition-colors"
+                            >
+                                <CheckCircle size={31} />
+                                Marcar como Concluído
+                            </button>
+                        </div>
+                        <div className="flex items-center gap-4 mt-6">
+                            <img
+                                className="h-16 w-16 rounded-full border-2 border-blue-500"
+                                src={lesson!.teacher.avatarURL}
+                                alt={`Imagem do professor ${lesson!.teacher.name}`}
+                            />
+                            <div className="leading-relaxed">
+                                <p className="text-xs">Professor</p>
+                                <strong className="font-bold text-2xl block">{lesson!.teacher.name}</strong>
+                                <span className="text-gray-200 text-sm block">{lesson!.teacher.bio}</span>
+                            </div>
                         </div>
                     </div>
                 </div>

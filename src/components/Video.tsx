@@ -103,9 +103,7 @@ export function Video(props: VideoProps) {
     const token = localStorage.getItem("sb-zrzlksbelolsesmacfhs-auth-token");
     const userData = token ? JSON.parse(token) : null;
     const alunoId = userData ? userData.user.id : null;
-
-    const lesson1 = lessonData || allLessonsData?.aulas[0];
-    console.log(lesson1)
+    
     const handleMarkAsCompleted = async () => {
         if (lesson && alunoId) {
             try {
@@ -121,15 +119,15 @@ export function Video(props: VideoProps) {
                     const aulasIdArray = existingRecords[0].aulas_id;
     
                     if (aulasIdArray.includes(lesson.id)) {
-                        // Se já tiver a aula, remove do aulas_id
+                      
                         const updatedAulasId = aulasIdArray.filter((id: string) => id !== lesson.id);
                         await supabase
                             .from('aulasCompletas')
                             .update({ aulas_id: updatedAulasId })
                             .eq('aluno_id', alunoId)
-                            .eq('curso_id', lessonData!.aula.curso.id); // Corrigido para usar lesson.curse.id
+                            .eq('curso_id', lessonData!.aula.curso.id); 
     
-                        props.updateCompletedLessons(lesson.id); // Atualiza a lista de aulas concluídas
+                        props.updateCompletedLessons(lesson.id); 
                         Swal.fire({
                             position: "top",
                             icon: "success",
@@ -139,13 +137,13 @@ export function Video(props: VideoProps) {
                             timerProgressBar: true,
                         });
                     } else {
-                        // Se não tiver a aula, adiciona ao aulas_id
+                       
                         const updatedAulasId = [...aulasIdArray, lesson.id];
                         await supabase
                             .from('aulasCompletas')
                             .update({ aulas_id: updatedAulasId })
                             .eq('aluno_id', alunoId)
-                            .eq('curso_id', lessonData!.aula.curso.id); // Corrigido para usar lesson.curse.id
+                            .eq('curso_id', lessonData!.aula.curso.id); 
     
                         props.updateCompletedLessons(lesson.id); 
                         Swal.fire({
@@ -158,18 +156,18 @@ export function Video(props: VideoProps) {
                         });
                     }
                 } else {
-                    // Se não houver registros, cria um novo
+                    
                     await supabase
                         .from('aulasCompletas')
                         .insert([
                             {
                                 aulas_id: [lesson.id],
-                                curso_id: lessonData!.aula.curso.id, // Corrigido para usar lesson.curse.id
+                                curso_id: lessonData!.aula.curso.id, 
                                 aluno_id: alunoId,
                             }
                         ]);
     
-                    props.updateCompletedLessons(lesson.id); // Atualiza a lista de aulas concluídas
+                    props.updateCompletedLessons(lesson.id);
                     Swal.fire({
                         position: "top",
                         icon: "success",
@@ -190,7 +188,6 @@ export function Video(props: VideoProps) {
             }
         }
     };
-    
 
     if (loading) {
         return (
@@ -217,8 +214,6 @@ export function Video(props: VideoProps) {
         );
         return { __html: descriptionWithLinks };
     };
-
-    console.log(lesson)
 
     return (
         <div className="flex-1 mt-4 mx-2">

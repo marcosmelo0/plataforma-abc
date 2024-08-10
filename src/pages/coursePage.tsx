@@ -52,6 +52,7 @@ const CoursePage = () => {
                 console.error("Erro ao buscar aulas completas:", fetchError);
                 return; 
             }
+            
 
             localStorage.setItem("completedLessons", JSON.stringify(completedData.map(ele => ele.aulas_id)));
 

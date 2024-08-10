@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 
-interface LessonProps {
+export interface LessonProps {
     title: string;
     slug: string;
     type: 'live' | 'class';

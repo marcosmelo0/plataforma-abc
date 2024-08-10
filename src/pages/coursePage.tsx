@@ -11,7 +11,7 @@ const GET_COURSE_BY_ID = gql`
         curso(where: { id: $id }) {
             id
             nome
-            aula (orderBy: publishedAt_ASC) { 
+            aula(orderBy: publishedAt_ASC) { 
                 id
                 title
                 slug
@@ -42,6 +42,7 @@ const CoursePage = () => {
         const fetchCompletedLessons = async () => {
             const userId = (await supabase.auth.getSession()).data.session?.user?.id;
             if (!userId) return; 
+
             const { data: completedData, error: fetchError } = await supabase
                 .from('aulasCompletas')
                 .select('curso_id, aulas_id')
@@ -49,8 +50,10 @@ const CoursePage = () => {
 
             if (fetchError) {
                 console.error("Erro ao buscar aulas completas:", fetchError);
-                return;
+                return; 
             }
+
+            localStorage.setItem("completedLessons", JSON.stringify(completedData.map(ele => ele.aulas_id)));
 
             if (completedData.length > 0) {
                 const courseData = completedData.find(course => course.curso_id === id);
@@ -86,11 +89,15 @@ const CoursePage = () => {
                         <Video 
                             key={aulas[0].id} 
                             lessonSlug={aulas[0].slug}
-                            updateCompletedLessons={updateCompletedLessons} // Corrigido para passar a função
+                            updateCompletedLessons={updateCompletedLessons} 
                         />
                     )}
                 </div>
-                <Sidebar completedLessons={completedLessons} updateCompletedLessons={updateCompletedLessons} aulas={aulas} />
+                <Sidebar 
+                    completedLessons={completedLessons} 
+                    updateCompletedLessons={updateCompletedLessons} 
+                    aulas={aulas} 
+                />
             </div>
         </div>
     );

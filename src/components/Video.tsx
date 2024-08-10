@@ -19,9 +19,9 @@ const GET_LESSON_BY_SLUG_QUERY = gql`
                 bio
                 avatarURL
             }
-            curse {
-                id
-            }
+        curso {
+            id
+        }
         }
     }
 `;
@@ -56,7 +56,7 @@ interface GetLessonBySlugResponse {
             avatarURL: string;
             name: string;
         }
-        curse: {
+        curso: {
             id: string;
         }
     }
@@ -104,30 +104,32 @@ export function Video(props: VideoProps) {
     const userData = token ? JSON.parse(token) : null;
     const alunoId = userData ? userData.user.id : null;
 
+    const lesson1 = lessonData || allLessonsData?.aulas[0];
+    console.log(lesson1)
     const handleMarkAsCompleted = async () => {
-        const lesson = lessonData?.aula || allLessonsData?.aulas[0]; 
         if (lesson && alunoId) {
             try {
                 const { data: existingRecords, error: fetchError } = await supabase
                     .from('aulasCompletas')
                     .select('aulas_id')
                     .eq('aluno_id', alunoId)
-                    .eq('curso_id', lesson.curse.id);
-
+                    .eq('curso_id', lessonData!.aula.curso.id); 
+    
                 if (fetchError) throw fetchError;
-
+    
                 if (existingRecords.length > 0) {
                     const aulasIdArray = existingRecords[0].aulas_id;
-
+    
                     if (aulasIdArray.includes(lesson.id)) {
+                        // Se já tiver a aula, remove do aulas_id
                         const updatedAulasId = aulasIdArray.filter((id: string) => id !== lesson.id);
                         await supabase
                             .from('aulasCompletas')
                             .update({ aulas_id: updatedAulasId })
                             .eq('aluno_id', alunoId)
-                            .eq('curso_id', lesson.curse.id);
-
-                        props.updateCompletedLessons(lesson.id);
+                            .eq('curso_id', lessonData!.aula.curso.id); // Corrigido para usar lesson.curse.id
+    
+                        props.updateCompletedLessons(lesson.id); // Atualiza a lista de aulas concluídas
                         Swal.fire({
                             position: "top",
                             icon: "success",
@@ -137,13 +139,14 @@ export function Video(props: VideoProps) {
                             timerProgressBar: true,
                         });
                     } else {
+                        // Se não tiver a aula, adiciona ao aulas_id
                         const updatedAulasId = [...aulasIdArray, lesson.id];
                         await supabase
                             .from('aulasCompletas')
                             .update({ aulas_id: updatedAulasId })
                             .eq('aluno_id', alunoId)
-                            .eq('curso_id', lesson.curse.id);
-
+                            .eq('curso_id', lessonData!.aula.curso.id); // Corrigido para usar lesson.curse.id
+    
                         props.updateCompletedLessons(lesson.id); 
                         Swal.fire({
                             position: "top",
@@ -155,17 +158,18 @@ export function Video(props: VideoProps) {
                         });
                     }
                 } else {
+                    // Se não houver registros, cria um novo
                     await supabase
                         .from('aulasCompletas')
                         .insert([
                             {
                                 aulas_id: [lesson.id],
-                                curso_id: lesson.curse.id,
+                                curso_id: lessonData!.aula.curso.id, // Corrigido para usar lesson.curse.id
                                 aluno_id: alunoId,
                             }
                         ]);
-
-                    props.updateCompletedLessons(lesson.id);
+    
+                    props.updateCompletedLessons(lesson.id); // Atualiza a lista de aulas concluídas
                     Swal.fire({
                         position: "top",
                         icon: "success",
@@ -186,6 +190,7 @@ export function Video(props: VideoProps) {
             }
         }
     };
+    
 
     if (loading) {
         return (
@@ -212,6 +217,8 @@ export function Video(props: VideoProps) {
         );
         return { __html: descriptionWithLinks };
     };
+
+    console.log(lesson)
 
     return (
         <div className="flex-1 mt-4 mx-2">

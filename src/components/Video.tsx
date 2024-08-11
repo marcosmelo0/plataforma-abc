@@ -19,9 +19,9 @@ const GET_LESSON_BY_SLUG_QUERY = gql`
                 bio
                 avatarURL
             }
-        curso {
-            id
-        }
+            curso {
+                id
+            }
         }
     }
 `;
@@ -119,7 +119,6 @@ export function Video(props: VideoProps) {
                     const aulasIdArray = existingRecords[0].aulas_id;
     
                     if (aulasIdArray.includes(lesson.id)) {
-                      
                         const updatedAulasId = aulasIdArray.filter((id: string) => id !== lesson.id);
                         await supabase
                             .from('aulasCompletas')
@@ -137,7 +136,6 @@ export function Video(props: VideoProps) {
                             timerProgressBar: true,
                         });
                     } else {
-                       
                         const updatedAulasId = [...aulasIdArray, lesson.id];
                         await supabase
                             .from('aulasCompletas')
@@ -156,7 +154,6 @@ export function Video(props: VideoProps) {
                         });
                     }
                 } else {
-                    
                     await supabase
                         .from('aulasCompletas')
                         .insert([
@@ -230,7 +227,8 @@ export function Video(props: VideoProps) {
                     <div className="flex-1">
                         <h1 className="text-2xl font-bold">{lesson!.title}</h1>
                         <p
-                            className="mt-4 text-gray-200 leading-relaxed"
+                            className="mt-4 text-gray-200 leading-relaxed break-words"
+                            style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
                             dangerouslySetInnerHTML={renderDescriptionWithLinks()}
                         />
                         <div className="flex flex-row gap-2">

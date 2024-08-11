@@ -107,7 +107,7 @@ const CoursePage = () => {
                     {aulas.length > 0 && (
                         <Video
                             key={aulas[0].id}
-                            lessonSlug={aulas[0].slug}
+                            lessonSlug={'historia-abc'}
                             updateCompletedLessons={updateCompletedLessons}
                         />
                     )}

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { DefaultUi, Player, Youtube, Vimeo } from "@vime/react";
+import { DefaultUi, Player, Vimeo } from "@vime/react";
 import { CheckCircle, CircleNotch } from "phosphor-react";
 import { gql, useQuery } from "@apollo/client";
 import '@vime/core/themes/default.css';

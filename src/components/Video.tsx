@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { DefaultUi, Player, Youtube } from "@vime/react";
+import { DefaultUi, Player, Youtube, Vimeo } from "@vime/react";
 import { CheckCircle, CircleNotch } from "phosphor-react";
 import { gql, useQuery } from "@apollo/client";
 import '@vime/core/themes/default.css';
@@ -220,7 +220,7 @@ export function Video(props: VideoProps) {
             <div className="bg-black flex justify-center">
                 <div className="h-full w-full max-w-[1100px] max-h-[60vh] aspect-video">
                     <Player>
-                        <Youtube videoId={lesson!.videoId} />
+                        <Vimeo videoId={lesson!.videoId}/>
                         <DefaultUi />
                     </Player>
                 </div>

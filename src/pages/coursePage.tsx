@@ -40,6 +40,8 @@ const CoursePage = () => {
         });
     };
 
+    
+
     useEffect(() => {
         const userToken = localStorage.getItem('sb-zrzlksbelolsesmacfhs-auth-token');
         const userId = userToken ? JSON.parse(atob(userToken.split('.')[1])).sub : null;
@@ -65,6 +67,28 @@ const CoursePage = () => {
 
         fetchCompletedLessons();
     }, [id]);
+
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    useEffect(() => {
+        const verifyAuthenticated = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = localStorage.getItem("sb-zrzlksbelolsesmacfhs-auth-token");
+            const tokenData = token ? JSON.parse(token) : null;
+          
+            if (!tokenData || tokenData.access_token !== session?.access_token) {
+                window.location.replace("/login");
+            } else {
+                setIsAuthenticated(true);
+            }
+        };
+
+        verifyAuthenticated();
+    }, []); 
+
+    if (!isAuthenticated) {
+        return null;
+    }
 
     if (loading) return <p>Carregando...</p>;
     if (error) {

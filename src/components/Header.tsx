@@ -57,6 +57,7 @@ export function Header() {
     const handleLogout = async () => {
         try {
             await supabase.auth.signOut();
+            localStorage.clear();
             window.location.href = '/login';
         } catch (error) {
             console.error("Logout failed:", error);

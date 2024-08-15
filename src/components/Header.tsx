@@ -100,7 +100,7 @@ export function Header() {
                             </div>
                             {isAdmin && (
                                 <a
-                                    href="/admin-report"
+                                    href="/report"
                                     className="block px-4 py-2 text-gray-700 hover:bg-gray-200 w-full text-left"
                                 >
                                     Ver Relatório

@@ -45,6 +45,8 @@ const GET_LESSONS_BY_COURSE_ID = gql`
     }
 `;
 
+
+
 interface GetLessonBySlugResponse {
     aula: {
         id: string;

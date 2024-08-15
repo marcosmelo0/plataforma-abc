@@ -119,6 +119,7 @@ export function Report() {
                         .single();
 
                     if (!profile!.is_super_admin) {
+                        navigate('/');
                         Swal.fire({
                             title: 'Acesso Negado',
                             text: 'Você não tem permissão para acessar esta página.',
@@ -127,9 +128,7 @@ export function Report() {
                             confirmButtonColor: 'blue',
                             timerProgressBar: true,
                             timer: 3000,
-                        }).then(() => {
-                            navigate('/');
-                        });
+                        })
                     }
                 }
             }

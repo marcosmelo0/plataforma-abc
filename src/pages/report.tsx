@@ -118,10 +118,6 @@ export function Report() {
                         .eq('id', user.id)
                         .single();
 
-                        if (!isAuthenticated) {
-                            return null;
-                        }
-
                     if (!profile!.is_super_admin) {
                         Swal.fire({
                             title: 'Acesso Negado',

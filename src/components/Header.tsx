@@ -31,8 +31,6 @@ export function Header() {
                         .join('');
                     setUserInitials(initials);
                     setUserName(profile.name);
-
-                    
                     setIsAdmin(profile.is_super_admin);
                 } else {
                     setUserInitials("?");
@@ -78,7 +76,7 @@ export function Header() {
 
     return (
         <header className="w-full py-4 px-6 flex items-center justify-between bg-blue-700 border-b border-blue-600">
-            <Logo  />
+            <Logo />
 
             {showProfileButton && (
                 <div className="relative">
@@ -96,7 +94,9 @@ export function Header() {
                     {isMenuOpen && (
                         <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg w-48 md:w-56" style={{ zIndex: 2000 }}>
                             <div className="p-2 border-b border-gray-200">
-                                <p className="text-gray-700 text-base text-nowrap">Bem-vindo, {userName || "Usuário"}</p>
+                                <p className="text-gray-700 text-base text-nowrap overflow-hidden text-ellipsis">
+                                    Bem-vindo, {userName || "Usuário"}
+                                </p>
                             </div>
                             {isAdmin && (
                                 <a

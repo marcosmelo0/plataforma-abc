@@ -1,7 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { gql, useQuery } from "@apollo/client";
 import { Header } from "../components/Header";
 import { supabase } from "../utils/supabase";
 import { useState, useEffect } from "react";
+import Swal from 'sweetalert2'; // Importando SweetAlert2
+import { useNavigate } from 'react-router-dom'; // Importando useNavigate
 
 const GET_ALL_COURSES = gql`
     query MyQuery {
@@ -28,6 +31,7 @@ interface GetAllCoursesResponse {
 interface UserProfile {
     id: string;
     name: string; 
+    is_super_admin: boolean; // Adicionando is_super_admin
 }
 
 interface CompletedLessons {
@@ -44,6 +48,8 @@ export function Report() {
     const [totalAulas, setTotalAulas] = useState<number>(0);
     const [aulasAssistidas, setAulasAssistidas] = useState<number>(0);
     const { data, loading, error } = useQuery<GetAllCoursesResponse>(GET_ALL_COURSES);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const navigate = useNavigate(); 
 
     const handleUsers = async () => {
         const { data } = await supabase.from('user_profiles').select('*');
@@ -94,9 +100,53 @@ export function Report() {
     };
 
     useEffect(() => {
+        const verifyAuthenticated = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = localStorage.getItem("sb-zrzlksbelolsesmacfhs-auth-token");
+            const tokenData = token ? JSON.parse(token) : null;
+            
+            if (!tokenData || tokenData.access_token !== session?.access_token) {
+                window.location.replace("/login");
+            } else {
+                setIsAuthenticated(true);
+
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user && user.id) {
+                    const { data: profile } = await supabase
+                        .from('user_profiles')
+                        .select('name, is_super_admin') 
+                        .eq('id', user.id)
+                        .single();
+
+                        if (!isAuthenticated) {
+                            return null;
+                        }
+
+                    if (!profile!.is_super_admin) {
+                        Swal.fire({
+                            title: 'Acesso Negado',
+                            text: 'Você não tem permissão para acessar esta página.',
+                            icon: 'error',
+                            confirmButtonText: 'Ok',
+                            confirmButtonColor: 'blue',
+                            timerProgressBar: true,
+                            timer: 3000,
+                        }).then(() => {
+                            navigate('/');
+                        });
+                    }
+                }
+            }
+        };
+
+        verifyAuthenticated();
         handleUsers();
         handleCompletedLessons();
-    }, []);
+    }, [navigate]);
+
+    if (!isAuthenticated) {
+        return null;
+    }
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error.message}</p>;

@@ -19,7 +19,7 @@ export function Header() {
             if (user && user.id) {
                 const { data: profile } = await supabase
                     .from('user_profiles')
-                    .select('name, is_super_admin') 
+                    .select('name, is_super_admin, typeUser') 
                     .eq('id', user.id)
                     .single();
 

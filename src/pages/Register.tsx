@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useForm } from "react-hook-form";
 import { supabase } from "../utils/supabase";
 import { Header } from "../components/Header";
@@ -10,9 +11,9 @@ const formSchema = z.object({
     name: z.string().min(1, "O nome é obrigatório."),
     email: z.string().email("Email inválido."),
     password: z.string().min(6, "A senha deve conter pelo menos 6 caracteres.").max(120, "A senha não pode ter mais de 120 caracteres."),
+    typeUser: z.enum(["lider", "colaborador"], { message: "typeUser deve ser 'lider' ou 'colaborador'." }),
     role: z.enum(["user", "admin"], { message: "Role deve ser 'user' ou 'admin'." })
 });
-
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -23,13 +24,14 @@ export function Register() {
             name: "",
             email: "",
             password: "",
+            typeUser: "colaborador",
             role: "user"
         }
     });
 
     const onSubmit = async (values: FormValues) => {
         try {
-            const { email, password, name, role } = values;
+            const { email, password, name, role, typeUser } = values;
 
             const { data: authData, error: authError } = await supabase.auth.signUp({
                 email,
@@ -39,10 +41,9 @@ export function Register() {
             if (authError) throw authError;
 
             if (authData.user) {
-                
                 const { error: dbError } = await supabase
                     .from('user_profiles')
-                    .upsert({ id: authData.user.id, name, is_super_admin: role === "admin" });
+                    .upsert({ id: authData.user.id, name, is_super_admin: role === "admin", typeUser: typeUser });
 
                 if (dbError) throw dbError;
 
@@ -60,7 +61,6 @@ export function Register() {
                     window.location.href = '/'
                 }, 3000);
             }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error("Register error", error);
             Swal.fire({
@@ -128,11 +128,25 @@ export function Register() {
                                 {...form.register("role")}
                                 className="w-full p-2 border border-gray-300 text-gray-600 rounded outline-blue-600"
                             >
-                                <option value="user">Usuário</option>
+                                <option defaultChecked value="user">Aluno</option>
                                 <option value="admin">Admin</option>
                             </select>
                             {form.formState.errors.role && (
                                 <span className="text-red-500 text-sm">{form.formState.errors.role.message}</span>
+                            )}
+                        </div>
+                        <div className="mb-4 text-base">
+                            <label className="block text-gray-700" htmlFor="role">Tipo de Usuário</label>
+                            <select
+                                id="typeUser"
+                                {...form.register("typeUser")}
+                                className="w-full p-2 border border-gray-300 text-gray-600 rounded outline-blue-600"
+                            >
+                                <option value="lider">Líder</option>
+                                <option defaultChecked value="colaborador">Colaborador</option>
+                            </select>
+                            {form.formState.errors.typeUser && (
+                                <span className="text-red-500 text-sm">{form.formState.errors.typeUser.message}</span>
                             )}
                         </div>
                         <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition-colors">

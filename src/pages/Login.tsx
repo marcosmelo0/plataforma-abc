@@ -27,8 +27,8 @@ export function Login() {
             const { data: { session } } = await supabase.auth.getSession();
             const token = localStorage.getItem("sb-zrzlksbelolsesmacfhs-auth-token");
             const tokenData = token ? JSON.parse(token) : null;
-           
-            if (session && tokenData.access_token === session?.access_token) {
+
+            if (session && tokenData?.access_token === session.access_token) {
                 window.location.replace("/");
             } else {
                 setLoading(false);
@@ -38,7 +38,6 @@ export function Login() {
         verifyAuthenticated();
     }, []);
 
-    
     if (loading) {
         return <div>Carregando...</div>;
     }
@@ -46,7 +45,7 @@ export function Login() {
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         try {
             const { email, password } = values;
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            const { error, data } = await supabase.auth.signInWithPassword({ email, password });
 
             if (error) throw error;
 
@@ -58,7 +57,19 @@ export function Login() {
                 timer: 1500,
                 timerProgressBar: true,
             });
-            setTimeout(() => {
+            setTimeout(async () => {
+                const { data: profile } = await supabase
+                    .from('user_profiles')
+                    .select('typeUser') 
+                    .eq('id', data.user.id)
+                    .single();
+
+                if (profile) {
+                    localStorage.setItem('typeUser', profile.typeUser); 
+                } else {
+                    console.error("Perfil não encontrado");
+                }
+
                 window.location.replace("/");
             }, 1500);
         } catch (error) {

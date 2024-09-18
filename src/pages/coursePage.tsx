@@ -97,7 +97,6 @@ const CoursePage = () => {
     }
 
     const aulas = data?.curso?.aula || [];
-    console.log(data)
 
     return (
         <div className="flex flex-col">
@@ -107,7 +106,7 @@ const CoursePage = () => {
                     {aulas.length > 0 && (
                         <Video
                             key={aulas[0].id}
-                            lessonSlug={'historia-abc'}
+                            lessonSlug={aulas[0].slug}
                             updateCompletedLessons={updateCompletedLessons}
                         />
                     )}

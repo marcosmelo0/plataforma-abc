@@ -116,20 +116,19 @@ export function Video(props: VideoProps) {
     
                 if (fetchError) throw fetchError;
     
-                // Verifica se já existe um registro para o aluno
                 const existingRecord = existingRecords.find(record => record.curso_id === lessonData!.aula.curso.id);
     
                 if (existingRecord) {
                     const aulasIdArray = existingRecord.aulas_id;
     
                     if (aulasIdArray.includes(lesson.id)) {
-                        // Remove a aula da lista de concluídas
+                        
                         const updatedAulasId = aulasIdArray.filter((id: string) => id !== lesson.id);
                         await supabase
                             .from('aulasCompletas')
                             .update({ aulas_id: updatedAulasId })
                             .eq('aluno_id', alunoId)
-                            .eq('curso_id', existingRecord.curso_id); // Mantém o curso_id existente
+                            .eq('curso_id', existingRecord.curso_id); 
     
                         props.updateCompletedLessons(lesson.id);
                         Swal.fire({
@@ -141,13 +140,13 @@ export function Video(props: VideoProps) {
                             timerProgressBar: true,
                         });
                     } else {
-                        // Adiciona a aula à lista de concluídas
+                        
                         const updatedAulasId = [...aulasIdArray, lesson.id];
                         await supabase
                             .from('aulasCompletas')
                             .update({ aulas_id: updatedAulasId })
                             .eq('aluno_id', alunoId)
-                            .eq('curso_id', existingRecord.curso_id); // Mantém o curso_id existente
+                            .eq('curso_id', existingRecord.curso_id); 
     
                         props.updateCompletedLessons(lesson.id);
                         Swal.fire({
@@ -160,7 +159,7 @@ export function Video(props: VideoProps) {
                         });
                     }
                 } else {
-                    // Se o curso do vídeo atual for diferente, cria um novo registro
+                    
                     const newCourseId = lessonData!.aula.curso.id;
                     const existingCourseIds = existingRecords.map(record => record.curso_id);
     
@@ -170,7 +169,7 @@ export function Video(props: VideoProps) {
                             .insert([
                                 {
                                     aulas_id: [lesson.id],
-                                    curso_id: newCourseId, // Novo curso_id
+                                    curso_id: newCourseId,
                                     aluno_id: alunoId,
                                 }
                             ]);
@@ -185,7 +184,7 @@ export function Video(props: VideoProps) {
                             timerProgressBar: true,
                         });
                     } else {
-                        // Se já existe um registro para o aluno, apenas atualiza
+                        
                         await supabase
                             .from('aulasCompletas')
                             .update({ aulas_id: [lesson.id] })
@@ -237,15 +236,15 @@ export function Video(props: VideoProps) {
         const description = lesson?.description || '';
         const descriptionWithLinks = description.replace(
             /(\b(https?|ftp):\/\/[^\s()]+\b)/gi,
-            '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+            '<a href="$1" target="_blank" rel="noopener noreferrer" style="color: blue; text-decoration: underline;">$1</a>'
         );
         return { __html: descriptionWithLinks };
     };
 
     return (
-        <div className="flex-1 mt-4 mx-2">
+        <div className="flex-1 mt-4 mx-2 relative">
             <div className="bg-black flex justify-center">
-                <div className="h-full w-full max-w-[1100px] max-h-[60vh] aspect-video">
+                <div className="h-full w-full max-w-[1100px] aspect-video">
                     <Player>
                         <Dailymotion videoId={lesson!.videoId}/>
                         <DefaultUi />
@@ -253,7 +252,7 @@ export function Video(props: VideoProps) {
                 </div>
             </div>
             <div className="flex ml-5 sm:max-w-[1100px] mt-6 mb-16">
-                <div className="flex items-start gap-16">
+                <div className="flex-1 items-start gap-16">
                     <div className="flex-1">
                         <h1 className="text-2xl font-bold">{lesson!.title}</h1>
                         <p
@@ -265,6 +264,7 @@ export function Video(props: VideoProps) {
                             <button 
                                 onClick={handleMarkAsCompleted}
                                 className="p-2 text-sm bg-green-500 flex items-center rounded font-bold uppercase gap-2 justify-center hover:bg-green-700 transition-colors"
+                                
                             >
                                 <CheckCircle size={31} />
                                 Marcar como Concluído
@@ -287,4 +287,5 @@ export function Video(props: VideoProps) {
             </div>
         </div>
     );
+    
 }

@@ -111,24 +111,27 @@ export function Video(props: VideoProps) {
             try {
                 const { data: existingRecords, error: fetchError } = await supabase
                     .from('aulasCompletas')
-                    .select('aulas_id')
-                    .eq('aluno_id', alunoId)
-                    .eq('curso_id', lessonData!.aula.curso.id); 
+                    .select('aulas_id, curso_id')
+                    .eq('aluno_id', alunoId);
     
                 if (fetchError) throw fetchError;
     
-                if (existingRecords.length > 0) {
-                    const aulasIdArray = existingRecords[0].aulas_id;
+                // Verifica se já existe um registro para o aluno
+                const existingRecord = existingRecords.find(record => record.curso_id === lessonData!.aula.curso.id);
+    
+                if (existingRecord) {
+                    const aulasIdArray = existingRecord.aulas_id;
     
                     if (aulasIdArray.includes(lesson.id)) {
+                        // Remove a aula da lista de concluídas
                         const updatedAulasId = aulasIdArray.filter((id: string) => id !== lesson.id);
                         await supabase
                             .from('aulasCompletas')
                             .update({ aulas_id: updatedAulasId })
                             .eq('aluno_id', alunoId)
-                            .eq('curso_id', lessonData!.aula.curso.id); 
+                            .eq('curso_id', existingRecord.curso_id); // Mantém o curso_id existente
     
-                        props.updateCompletedLessons(lesson.id); 
+                        props.updateCompletedLessons(lesson.id);
                         Swal.fire({
                             position: "top",
                             icon: "success",
@@ -138,14 +141,15 @@ export function Video(props: VideoProps) {
                             timerProgressBar: true,
                         });
                     } else {
+                        // Adiciona a aula à lista de concluídas
                         const updatedAulasId = [...aulasIdArray, lesson.id];
                         await supabase
                             .from('aulasCompletas')
                             .update({ aulas_id: updatedAulasId })
                             .eq('aluno_id', alunoId)
-                            .eq('curso_id', lessonData!.aula.curso.id); 
+                            .eq('curso_id', existingRecord.curso_id); // Mantém o curso_id existente
     
-                        props.updateCompletedLessons(lesson.id); 
+                        props.updateCompletedLessons(lesson.id);
                         Swal.fire({
                             position: "top",
                             icon: "success",
@@ -156,25 +160,48 @@ export function Video(props: VideoProps) {
                         });
                     }
                 } else {
-                    await supabase
-                        .from('aulasCompletas')
-                        .insert([
-                            {
-                                aulas_id: [lesson.id],
-                                curso_id: lessonData!.aula.curso.id, 
-                                aluno_id: alunoId,
-                            }
-                        ]);
+                    // Se o curso do vídeo atual for diferente, cria um novo registro
+                    const newCourseId = lessonData!.aula.curso.id;
+                    const existingCourseIds = existingRecords.map(record => record.curso_id);
     
-                    props.updateCompletedLessons(lesson.id);
-                    Swal.fire({
-                        position: "top",
-                        icon: "success",
-                        title: "Aula marcada como concluída!",
-                        showConfirmButton: false,
-                        timer: 2000,
-                        timerProgressBar: true,
-                    });
+                    if (!existingCourseIds.includes(newCourseId)) {
+                        await supabase
+                            .from('aulasCompletas')
+                            .insert([
+                                {
+                                    aulas_id: [lesson.id],
+                                    curso_id: newCourseId, // Novo curso_id
+                                    aluno_id: alunoId,
+                                }
+                            ]);
+                        
+                        props.updateCompletedLessons(lesson.id);
+                        Swal.fire({
+                            position: "top",
+                            icon: "success",
+                            title: "Aula marcada como concluída!",
+                            showConfirmButton: false,
+                            timer: 2000,
+                            timerProgressBar: true,
+                        });
+                    } else {
+                        // Se já existe um registro para o aluno, apenas atualiza
+                        await supabase
+                            .from('aulasCompletas')
+                            .update({ aulas_id: [lesson.id] })
+                            .eq('aluno_id', alunoId)
+                            .eq('curso_id', newCourseId);
+    
+                        props.updateCompletedLessons(lesson.id);
+                        Swal.fire({
+                            position: "top",
+                            icon: "success",
+                            title: "Aula marcada como concluída!",
+                            showConfirmButton: false,
+                            timer: 2000,
+                            timerProgressBar: true,
+                        });
+                    }
                 }
             } catch (error) {
                 console.error("Erro ao marcar aula como concluída:", error);
@@ -187,6 +214,7 @@ export function Video(props: VideoProps) {
             }
         }
     };
+    
 
     if (loading) {
         return (

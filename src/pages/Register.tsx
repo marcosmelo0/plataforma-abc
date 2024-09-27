@@ -121,7 +121,7 @@ export function Register() {
                                 <span className="text-red-500 text-sm">{form.formState.errors.password.message}</span>
                             )}
                         </div>
-                        <div className="mb-4 text-base">
+                        {/* <div className="mb-4 text-base">
                             <label className="block text-gray-700" htmlFor="role">Tipo de Usuário</label>
                             <select
                                 id="role"
@@ -134,7 +134,7 @@ export function Register() {
                             {form.formState.errors.role && (
                                 <span className="text-red-500 text-sm">{form.formState.errors.role.message}</span>
                             )}
-                        </div>
+                        </div> */}
                         <div className="mb-4 text-base">
                             <label className="block text-gray-700" htmlFor="role">Tipo de Usuário</label>
                             <select

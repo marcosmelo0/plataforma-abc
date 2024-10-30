@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Dailymotion, DefaultUi, Player } from "@vime/react";
+import { Dailymotion, Player } from "@vime/react";
 import { CheckCircle, CircleNotch } from "phosphor-react";
 import { gql, useQuery } from "@apollo/client";
 import '@vime/core/themes/default.css';

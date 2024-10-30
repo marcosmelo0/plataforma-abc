@@ -245,9 +245,8 @@ export function Video(props: VideoProps) {
         <div className="flex-1 mt-4 mx-2 relative">
             <div className="bg-black flex justify-center">
                 <div className="h-full w-full max-w-[1100px] aspect-video">
-                    <Player>
+                    <Player controls>
                         <Dailymotion videoId={lesson!.videoId}/>
-                        <DefaultUi />
                     </Player>
                 </div>
             </div>

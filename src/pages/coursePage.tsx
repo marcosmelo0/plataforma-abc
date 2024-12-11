@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { gql, useQuery } from "@apollo/client";
-import { Video } from '../components/Video'; 
+import { Video } from '../components/Video';
 import { Sidebar } from '../components/Sidebar';
 import { Header } from '../components/Header';
 import { supabase } from '../utils/supabase';
@@ -21,53 +21,7 @@ const GET_COURSE_BY_ID = gql`
     }
 `;
 
-const CoursePage = () => {
-    const { id } = useParams<{ id: string }>();
-    const { data, loading, error } = useQuery(GET_COURSE_BY_ID, {
-        variables: { id },
-    });
-
-    const [completedLessons, setCompletedLessons] = useState<string[]>([]);
-
-    const updateCompletedLessons = (lessonId: string) => {
-        setCompletedLessons(prev => {
-            const updatedCompletedLessons = prev.includes(lessonId)
-                ? prev.filter(id => id !== lessonId)
-                : [...prev, lessonId];
-                
-            localStorage.setItem('completedLessons', JSON.stringify(updatedCompletedLessons));
-            return updatedCompletedLessons;
-        });
-    };
-
-    
-
-    useEffect(() => {
-        const userToken = localStorage.getItem('sb-zrzlksbelolsesmacfhs-auth-token');
-        const userId = userToken ? JSON.parse(atob(userToken.split('.')[1])).sub : null;
-
-        const fetchCompletedLessons = async () => {
-            if (!userId || !id) return;
-
-            const { data: completedLessonsData, error } = await supabase
-                .from('aulasCompletas')
-                .select('aulas_id')
-                .eq('aluno_id', userId)
-                .eq('curso_id', id);
-
-            if (error) {
-                console.error("Erro ao buscar aulas completas:", error);
-                return;
-            }
-
-            const completedLessonIds = completedLessonsData.map((lesson: any) => lesson.aulas_id);
-            setCompletedLessons(completedLessonIds);
-            localStorage.setItem('completedLessons', JSON.stringify(completedLessonIds));
-        };
-
-        fetchCompletedLessons();
-    }, [id]);
-
+export const useAuth = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
@@ -75,7 +29,7 @@ const CoursePage = () => {
             const { data: { session } } = await supabase.auth.getSession();
             const token = localStorage.getItem("sb-zrzlksbelolsesmacfhs-auth-token");
             const tokenData = token ? JSON.parse(token) : null;
-          
+
             if (!tokenData || tokenData.access_token !== session?.access_token) {
                 window.location.replace("/login");
             } else {
@@ -84,12 +38,81 @@ const CoursePage = () => {
         };
 
         verifyAuthenticated();
-    }, []); 
+    }, []);
+
+    return isAuthenticated;
+};
+
+export const useCompletedLessons = (courseId: string) => {
+    const [completedLessons, setCompletedLessons] = useState<any[]>(() => {
+        const storedLessons = localStorage.getItem('completedLessons');
+        try {
+            const parsed = storedLessons ? JSON.parse(storedLessons) : [];
+            return Array.isArray(parsed) ? parsed.flat() : [];
+        } catch {
+            return [];
+        }
+    });
+
+    const updateCompletedLessons = (lessonId: string) => {
+        setCompletedLessons(prev => {
+            const updatedCompletedLessons = prev.includes(lessonId)
+                ? prev.filter(id => id !== lessonId)
+                : [...prev, lessonId];
+
+            localStorage.setItem('completedLessons', JSON.stringify(updatedCompletedLessons));
+            return updatedCompletedLessons;
+        });
+    };
+
+    useEffect(() => {
+        const fetchCompletedLessons = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.user?.id || !courseId) return;
+
+            const { data: completedLessonsData, error } = await supabase
+                .from('aulasCompletas')
+                .select('aulas_id')
+                .eq('aluno_id', session.user.id)
+                .eq('curso_id', courseId);
+
+            if (error) {
+                console.error("Error fetching completed lessons:", error);
+                return;
+            }
+
+            const completedLessonIds = completedLessonsData.map(lesson => lesson.aulas_id);
+
+            setCompletedLessons(prev => {
+                
+                const newCompletedLessons = Array.from(new Set([...prev, ...completedLessonIds]));
+                localStorage.setItem('completedLessons', JSON.stringify(newCompletedLessons));
+                return newCompletedLessons;
+            });
+        };
+
+        fetchCompletedLessons();
+    }, [courseId]);
+
+    return { completedLessons, updateCompletedLessons };
+};
+
+const CoursePage = () => {
+    const { id } = useParams<{ id: string }>();
+    const course = localStorage.getItem("c")
+    const isAuthenticated = useAuth();
+    const { completedLessons, updateCompletedLessons } = useCompletedLessons(course || '');
+    localStorage.setItem('completedLessons', JSON.stringify(completedLessons[0]));
+
+
+    const { data, loading, error } = useQuery(GET_COURSE_BY_ID, {
+        variables: { id },
+    });
 
     if (!isAuthenticated) {
         return null;
     }
-
+    
     if (loading) return <p>Carregando...</p>;
     if (error) {
         console.error("Erro ao buscar dados:", error);
@@ -112,7 +135,7 @@ const CoursePage = () => {
                     )}
                 </div>
                 <Sidebar
-                    completedLessons={completedLessons}
+                    completedLessons={completedLessons[0]}
                     updateCompletedLessons={updateCompletedLessons}
                 />
             </div>

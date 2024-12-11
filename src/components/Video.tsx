@@ -119,16 +119,16 @@ export function Video(props: VideoProps) {
                 const existingRecord = existingRecords.find(record => record.curso_id === lessonData!.aula.curso.id);
     
                 if (existingRecord) {
-                    const aulasIdArray = existingRecord.aulas_id;
+                    const aulasIdArray = existingRecord.aulas_id || []; // Ensure it's an array
     
                     if (aulasIdArray.includes(lesson.id)) {
-                        
+                        // Remove lesson
                         const updatedAulasId = aulasIdArray.filter((id: string) => id !== lesson.id);
                         await supabase
                             .from('aulasCompletas')
                             .update({ aulas_id: updatedAulasId })
                             .eq('aluno_id', alunoId)
-                            .eq('curso_id', existingRecord.curso_id); 
+                            .eq('curso_id', existingRecord.curso_id);
     
                         props.updateCompletedLessons(lesson.id);
                         Swal.fire({
@@ -140,13 +140,13 @@ export function Video(props: VideoProps) {
                             timerProgressBar: true,
                         });
                     } else {
-                        
+                        // Add lesson
                         const updatedAulasId = [...aulasIdArray, lesson.id];
                         await supabase
                             .from('aulasCompletas')
                             .update({ aulas_id: updatedAulasId })
                             .eq('aluno_id', alunoId)
-                            .eq('curso_id', existingRecord.curso_id); 
+                            .eq('curso_id', existingRecord.curso_id);
     
                         props.updateCompletedLessons(lesson.id);
                         Swal.fire({
@@ -159,48 +159,25 @@ export function Video(props: VideoProps) {
                         });
                     }
                 } else {
-                    
-                    const newCourseId = lessonData!.aula.curso.id;
-                    const existingCourseIds = existingRecords.map(record => record.curso_id);
+                    await supabase
+                        .from('aulasCompletas')
+                        .insert([
+                            {
+                                aulas_id: [lesson.id],
+                                curso_id: lessonData!.aula.curso.id,
+                                aluno_id: alunoId,
+                            }
+                        ]);
     
-                    if (!existingCourseIds.includes(newCourseId)) {
-                        await supabase
-                            .from('aulasCompletas')
-                            .insert([
-                                {
-                                    aulas_id: [lesson.id],
-                                    curso_id: newCourseId,
-                                    aluno_id: alunoId,
-                                }
-                            ]);
-                        
-                        props.updateCompletedLessons(lesson.id);
-                        Swal.fire({
-                            position: "top",
-                            icon: "success",
-                            title: "Aula marcada como concluída!",
-                            showConfirmButton: false,
-                            timer: 2000,
-                            timerProgressBar: true,
-                        });
-                    } else {
-                        
-                        await supabase
-                            .from('aulasCompletas')
-                            .update({ aulas_id: [lesson.id] })
-                            .eq('aluno_id', alunoId)
-                            .eq('curso_id', newCourseId);
-    
-                        props.updateCompletedLessons(lesson.id);
-                        Swal.fire({
-                            position: "top",
-                            icon: "success",
-                            title: "Aula marcada como concluída!",
-                            showConfirmButton: false,
-                            timer: 2000,
-                            timerProgressBar: true,
-                        });
-                    }
+                    props.updateCompletedLessons(lesson.id);
+                    Swal.fire({
+                        position: "top",
+                        icon: "success",
+                        title: "Aula marcada como concluída!",
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                    });
                 }
             } catch (error) {
                 console.error("Erro ao marcar aula como concluída:", error);
@@ -211,6 +188,8 @@ export function Video(props: VideoProps) {
                     confirmButtonText: 'Ok'
                 });
             }
+        } else {
+            console.warn("Lesson or alunoId is not defined.");
         }
     };
     

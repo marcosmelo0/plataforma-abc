@@ -55,6 +55,7 @@ export function Sidebar({ completedLessons, updateCompletedLessons }: SidebarPro
     const aulas: LessonType[] = data?.curso?.aula || [];
 
     const handleLessonClick = (lessonId: string) => {
+        
         updateCompletedLessons(lessonId);
     };
 
@@ -67,7 +68,7 @@ export function Sidebar({ completedLessons, updateCompletedLessons }: SidebarPro
 
             <div>
                 {aulas.map((lesson: LessonType) => {
-                    const isCompleted = completedLessons.includes(lesson.id);
+                   const isCompleted = Array.isArray(completedLessons) && completedLessons.includes(lesson.id);
                     return (
                         <div 
                             key={lesson.id} 

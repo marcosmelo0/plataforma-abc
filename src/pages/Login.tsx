@@ -37,7 +37,6 @@ export function Login() {
 
         verifyAuthenticated();
     }, []);
-
     if (loading) {
         return <div>Carregando...</div>;
     }

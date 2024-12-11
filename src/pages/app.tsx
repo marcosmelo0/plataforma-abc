@@ -5,6 +5,7 @@ import { Sidebar } from "../components/Sidebar";
 import { Video } from "../components/Video";
 import { gql, useQuery } from "@apollo/client";
 import { supabase } from "../utils/supabase";
+import { useCompletedLessons } from "./coursePage";
 
 const QueryFirst = gql`
     query {
@@ -20,11 +21,13 @@ interface QueryFirstResponse {
     }[]
 }
 
+
 export function Event() {
+    const courseId = localStorage.getItem("c")
     const { slug } = useParams<{ slug: string }>();
     const { data, loading } = useQuery<QueryFirstResponse>(QueryFirst);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+    const {completedLessons, updateCompletedLessons} = useCompletedLessons(courseId || '');
 
     useEffect(() => {
         const verifyAuthenticated = async () => {
@@ -42,28 +45,8 @@ export function Event() {
         verifyAuthenticated();
     }, []); 
 
-    useEffect(() => {
-        const fetchCompletedLessons = async () => {
-            const token = localStorage.getItem("sb-zrzlksbelolsesmacfhs-auth-token");
-            const userData = token ? JSON.parse(token) : null;
-            const alunoId = userData ? userData.user.id : null;
-          
-            if (alunoId) {
-                const { data: records, error } = await supabase
-                    .from('aulasCompletas')
-                    .select('aulas_id')
-                    .eq('aluno_id', alunoId);
 
-                if (error) {
-                    console.error("Erro ao buscar aulas concluídas:", error);
-                } else if (records.length > 0) {
-                    setCompletedLessons(records[0].aulas_id); 
-                }
-            }
-        };
 
-        fetchCompletedLessons();
-    }, []);
 
     if (!isAuthenticated) {
         return null;
@@ -74,16 +57,6 @@ export function Event() {
     }
     
     const first = data?.aulas[0]?.slug;
-
-    const updateCompletedLessons = (lessonId: string) => {
-        setCompletedLessons(prev => {
-            if (prev.includes(lessonId)) {
-                return prev.filter(id => id !== lessonId);
-            } else {
-                return [...prev, lessonId];
-            }
-        });
-    };
 
     return (
         <div className="flex flex-col">

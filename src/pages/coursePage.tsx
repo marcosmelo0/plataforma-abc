@@ -113,7 +113,7 @@ const CoursePage = () => {
     const course = localStorage.getItem("c")
     const isAuthenticated = useAuth();
     const { completedLessons, updateCompletedLessons } = useCompletedLessons(course || '');
-    localStorage.setItem('completedLessons', JSON.stringify(completedLessons[0]));
+    
 
 
     const { data, loading, error } = useQuery(GET_COURSE_BY_ID, {

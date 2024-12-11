@@ -47,8 +47,14 @@ export const useCompletedLessons = (courseId: string) => {
     const [completedLessons, setCompletedLessons] = useState<any[]>(() => {
         const storedLessons = localStorage.getItem('completedLessons');
         try {
+            // Tenta recuperar e parsear o valor do localStorage
             const parsed = storedLessons ? JSON.parse(storedLessons) : [];
-            return Array.isArray(parsed) ? parsed.flat() : [];
+            
+            // Se o valor não for um array ou for um array dentro de outro array, flatten
+            if (Array.isArray(parsed)) {
+                return parsed.flat().filter(item => typeof item === 'string');
+            }
+            return [];
         } catch {
             return [];
         }
@@ -60,6 +66,7 @@ export const useCompletedLessons = (courseId: string) => {
                 ? prev.filter(id => id !== lessonId)
                 : [...prev, lessonId];
 
+            // Armazena o valor no localStorage sempre como um array de strings simples
             localStorage.setItem('completedLessons', JSON.stringify(updatedCompletedLessons));
             return updatedCompletedLessons;
         });
@@ -84,8 +91,9 @@ export const useCompletedLessons = (courseId: string) => {
             const completedLessonIds = completedLessonsData.map(lesson => lesson.aulas_id);
 
             setCompletedLessons(prev => {
-                
                 const newCompletedLessons = Array.from(new Set([...prev, ...completedLessonIds]));
+                
+                // Armazena o valor no localStorage sempre como um array de strings simples
                 localStorage.setItem('completedLessons', JSON.stringify(newCompletedLessons));
                 return newCompletedLessons;
             });
@@ -94,8 +102,11 @@ export const useCompletedLessons = (courseId: string) => {
         fetchCompletedLessons();
     }, [courseId]);
 
+    console.log(completedLessons);
+
     return { completedLessons, updateCompletedLessons };
 };
+
 
 const CoursePage = () => {
     const { id } = useParams<{ id: string }>();
